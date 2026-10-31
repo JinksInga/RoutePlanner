@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="#F5F7FA">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Route Planner"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:textColor="#183153"
+            android:layout_marginTop="32dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="GESTIÓN INTELIGENTE DE RUTAS"
+            android:textSize="12sp"
+            android:textColor="#607080"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="32dp"/>
+
+        <Button
+            android:id="@+id/btnNewRoute"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:text="Nueva ruta"
+            android:textSize="17sp"/>
+
+        <Button
+            android:id="@+id/btnDestinations"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:text="Mis direcciones"
+            android:textSize="17sp"
+            android:layout_marginTop="16dp"/>
+
+        <Button
+            android:id="@+id/btnHistory"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:text="Historial de rutas"
+            android:textSize="17sp"
+            android:layout_marginTop="16dp"/>
+
+        <Button
+            android:id="@+id/btnSettings"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:text="Configuración"
+            android:textSize="17sp"
+            android:layout_marginTop="16dp"/>
+
+    </LinearLayout>
+</ScrollView>

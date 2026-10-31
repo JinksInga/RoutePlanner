@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F4F7FB"
+    android:padding="20dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tu ruta optimizada"
+        android:textColor="#183153"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/tvRouteSummary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Estas son las paradas ordenadas para tu recorrido."
+        android:textColor="#52657D"
+        android:textSize="15sp"
+        android:layout_marginBottom="20dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvOptimizedRoute"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingBottom="12dp" />
+
+    <Button
+        android:id="@+id/btnStartRoute"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Comenzar ruta" />
+
+    <Button
+        android:id="@+id/btnBackToNewRoute"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Volver"
+        android:layout_marginTop="8dp" />
+
+</LinearLayout>

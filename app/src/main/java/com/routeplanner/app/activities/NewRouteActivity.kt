@@ -1,0 +1,481 @@
+package com.routeplanner.app.activities
+
+import android.app.Activity
+import android.content.Intent
+import com.routeplanner.app.BuildConfig
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.net.FetchPlaceRequest
+import com.google.android.libraries.places.api.net.PlacesClient
+import com.google.android.libraries.places.widget.PlaceAutocomplete
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Bundle
+import android.view.View
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationTokenSource
+import com.routeplanner.app.adapters.RouteDestinationAdapter
+import com.routeplanner.app.data.database.RouteDatabase
+import com.routeplanner.app.databinding.ActivityNewRouteBinding
+import com.routeplanner.app.repository.DestinationRepository
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import com.routeplanner.app.RouteOptimizer
+import kotlinx.coroutines.flow.first
+import kotlin.jvm.java
+
+class NewRouteActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityNewRouteBinding
+    private lateinit var adapter: RouteDestinationAdapter
+    private lateinit var repository: DestinationRepository
+    private lateinit var fusedLocationClient:
+            com.google.android.gms.location.FusedLocationProviderClient
+    private lateinit var placesClient: PlacesClient
+
+    private val AUTOCOMPLETE_ORIGIN_REQUEST_CODE = 1002
+    private var cancellationTokenSource: CancellationTokenSource? = null
+    private var selectedCount = 0
+
+    // Coordenadas del punto de partida
+    private var selectedOriginLatitude: Double? = null
+    private var selectedOriginLongitude: Double? = null
+
+    private val preferences by lazy {
+        getSharedPreferences("route_preferences", MODE_PRIVATE)
+    }
+
+    // Solicitud de permisos de ubicación
+    private val locationPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
+
+            val fineGranted =
+                permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+
+            val coarseGranted =
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+
+            if (fineGranted || coarseGranted) {
+                getCurrentLocation()
+            } else {
+                Toast.makeText(
+                    this,
+                    "Necesitamos permiso de ubicación para obtener tu posición.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        binding = ActivityNewRouteBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        if (!Places.isInitialized()) {
+            Places.initializeWithNewPlacesApiEnabled(
+                applicationContext,
+                BuildConfig.PLACES_API_KEY
+            )
+        }
+
+        placesClient = Places.createClient(this)
+
+        fusedLocationClient =
+            LocationServices.getFusedLocationProviderClient(this)
+
+        configureRepository()
+        configureRecyclerView()
+        observeDestinations()
+        configureButtons()
+    }
+
+    private fun configureRepository() {
+        val database = RouteDatabase.getDatabase(applicationContext)
+        repository = DestinationRepository(database.destinationDao())
+    }
+
+    private fun configureRecyclerView() {
+        adapter = RouteDestinationAdapter { selectedDestinations ->
+
+            selectedCount = selectedDestinations.size
+
+            saveSelectedDestinations(
+                selectedDestinations.map { it.id }.toSet()
+            )
+
+            binding.tvDestinationCount.text =
+                if (selectedCount == 1) {
+                    "1 destino seleccionado"
+                } else {
+                    "$selectedCount destinos seleccionados"
+                }
+        }
+
+        binding.rvRouteDestinations.layoutManager =
+            LinearLayoutManager(this)
+
+        binding.rvRouteDestinations.adapter = adapter
+    }
+
+    private fun observeDestinations() {
+        lifecycleScope.launch {
+            repository.getAllDestinations().collectLatest { destinations ->
+
+                val savedSelection = getSelectedDestinations()
+
+                adapter.updateDestinations(destinations)
+                adapter.restoreSelection(savedSelection)
+
+                if (destinations.isEmpty()) {
+                    binding.tvNoDestinations.visibility = View.VISIBLE
+                    binding.rvRouteDestinations.visibility = View.GONE
+                } else {
+                    binding.tvNoDestinations.visibility = View.GONE
+                    binding.rvRouteDestinations.visibility = View.VISIBLE
+                }
+            }
+        }
+    }
+
+    private fun configureButtons() {
+
+        binding.btnCurrentLocation.setOnClickListener {
+            checkLocationPermission()
+        }
+
+        binding.btnManualOrigin.setOnClickListener {
+            launchOriginAutocomplete()
+        }
+
+        binding.btnCalculateRoute.setOnClickListener {
+            calculateRoute()
+        }
+    }
+
+    private fun calculateRoute() {
+
+        // Comprobar que existe un origen.
+        val originLatitude = selectedOriginLatitude
+        val originLongitude = selectedOriginLongitude
+
+        if (originLatitude == null || originLongitude == null) {
+            Toast.makeText(
+                this,
+                "Primero debes seleccionar un punto de partida.",
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
+
+        // Comprobar que hay destinos seleccionados.
+        val selectedIds = getSelectedDestinations()
+
+        if (selectedIds.isEmpty()) {
+            Toast.makeText(
+                this,
+                "Selecciona al menos un destino.",
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
+
+        // Por ahora solo está implementada la optimización Greedy.
+        if (!binding.rbNearest.isChecked) {
+            Toast.makeText(
+                this,
+                "La optimización global todavía no está disponible.",
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
+
+        lifecycleScope.launch {
+            try {
+                // Recuperar los destinos guardados en Room.
+                val allDestinations = repository.getAllDestinations().first()
+
+                val selectedDestinations = allDestinations.filter {
+                    selectedIds.contains(it.id)
+                }
+
+                if (selectedDestinations.isEmpty()) {
+                    Toast.makeText(
+                        this@NewRouteActivity,
+                        "No se han encontrado los destinos seleccionados.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    return@launch
+                }
+
+                // Comprobar que todos tienen coordenadas.
+                val missingCoordinates = selectedDestinations.any {
+                    it.latitude == null || it.longitude == null
+                }
+
+                if (missingCoordinates) {
+                    Toast.makeText(
+                        this@NewRouteActivity,
+                        "Hay destinos sin coordenadas. Revisa sus direcciones.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    return@launch
+                }
+
+                // Calcular el orden de las paradas.
+                val optimizedRoute = RouteOptimizer.optimizeNearestNeighbor(
+                    originLatitude,
+                    originLongitude,
+                    selectedDestinations
+                )
+
+                if (optimizedRoute.size != selectedDestinations.size) {
+                    Toast.makeText(
+                        this@NewRouteActivity,
+                        "No se han podido ordenar todos los destinos.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    return@launch
+                }
+
+                // Enviar los identificadores en el orden calculado.
+                val intent = Intent(
+                    this@NewRouteActivity,
+                    RouteResultActivity::class.java
+                )
+
+                intent.putExtra(
+                    RouteResultActivity.EXTRA_DESTINATION_IDS,
+                    optimizedRoute.map { it.id }.toIntArray()
+                )
+
+                startActivity(intent)
+
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@NewRouteActivity,
+                    "Error al calcular la ruta: ${e.localizedMessage}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    private fun launchOriginAutocomplete() {
+
+        try {
+            val intent = PlaceAutocomplete.createIntent(this) {
+                setCountries(listOf("ES"))
+            }
+
+            startActivityForResult(
+                intent,
+                AUTOCOMPLETE_ORIGIN_REQUEST_CODE
+            )
+
+        } catch (e: Exception) {
+            Toast.makeText(
+                this,
+                "No se pudo abrir Google Places: ${e.message}",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    private fun checkLocationPermission() {
+
+        val fineGranted = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        val coarseGranted = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (fineGranted || coarseGranted) {
+            getCurrentLocation()
+        } else {
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
+
+    private fun getCurrentLocation() {
+
+        cancellationTokenSource?.cancel()
+        cancellationTokenSource = CancellationTokenSource()
+
+        Toast.makeText(
+            this,
+            "Obteniendo ubicación...",
+            Toast.LENGTH_SHORT
+        ).show()
+
+        try {
+            fusedLocationClient.getCurrentLocation(
+                Priority.PRIORITY_HIGH_ACCURACY,
+                cancellationTokenSource!!.token
+            ).addOnSuccessListener { location ->
+
+                if (location != null) {
+
+                    selectedOriginLatitude = location.latitude
+                    selectedOriginLongitude = location.longitude
+
+                    binding.tvSelectedOrigin.text =
+                        "Ubicación actual seleccionada\n" +
+                                "Latitud: ${location.latitude}\n" +
+                                "Longitud: ${location.longitude}"
+
+                    Toast.makeText(
+                        this,
+                        "Ubicación obtenida correctamente.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                } else {
+                    Toast.makeText(
+                        this,
+                        "No se pudo obtener la ubicación. Comprueba que el GPS está activado.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+
+            }.addOnFailureListener {
+                Toast.makeText(
+                    this,
+                    "Error al obtener la ubicación: ${it.localizedMessage}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+
+        } catch (e: SecurityException) {
+            Toast.makeText(
+                this,
+                "No tenemos permiso para acceder a la ubicación.",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    private fun saveSelectedDestinations(ids: Set<Int>) {
+        preferences.edit()
+            .putStringSet(
+                "selected_destination_ids",
+                ids.map { it.toString() }.toSet()
+            )
+            .apply()
+    }
+
+    private fun getSelectedDestinations(): Set<Int> {
+        return preferences.getStringSet(
+            "selected_destination_ids",
+            emptySet()
+        )?.mapNotNull { it.toIntOrNull() }?.toSet() ?: emptySet()
+    }
+
+    @Suppress("DEPRECATION")
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode != AUTOCOMPLETE_ORIGIN_REQUEST_CODE) {
+            return
+        }
+
+        if (resultCode != Activity.RESULT_OK || data == null) {
+            return
+        }
+
+        val prediction = PlaceAutocomplete.getPredictionFromIntent(data)
+
+        if (prediction == null) {
+            Toast.makeText(
+                this,
+                "No se pudo identificar la dirección seleccionada",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        val sessionToken =
+            PlaceAutocomplete.getSessionTokenFromIntent(data)
+
+        val placeFields = listOf(
+            Place.Field.FORMATTED_ADDRESS,
+            Place.Field.LOCATION
+        )
+
+        val request = FetchPlaceRequest.builder(
+            prediction.placeId,
+            placeFields
+        )
+            .setSessionToken(sessionToken)
+            .build()
+
+        placesClient.fetchPlace(request)
+            .addOnSuccessListener { response ->
+
+                val place = response.place
+
+                val address = place.formattedAddress
+                    ?: prediction.getFullText(null).toString()
+
+                val location = place.location
+
+                if (location == null) {
+                    Toast.makeText(
+                        this,
+                        "Google no ha devuelto las coordenadas",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@addOnSuccessListener
+                }
+
+                selectedOriginLatitude = location.latitude
+                selectedOriginLongitude = location.longitude
+
+                binding.tvSelectedOrigin.text =
+                    "$address\n" +
+                            "Latitud: ${location.latitude}\n" +
+                            "Longitud: ${location.longitude}"
+
+                Toast.makeText(
+                    this,
+                    "Punto de partida seleccionado",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            .addOnFailureListener { exception ->
+
+                Toast.makeText(
+                    this,
+                    "Error al consultar el lugar: ${exception.message}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+    }
+
+    override fun onDestroy() {
+        cancellationTokenSource?.cancel()
+        super.onDestroy()
+    }
+}
