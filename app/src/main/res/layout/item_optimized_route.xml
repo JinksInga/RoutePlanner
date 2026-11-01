@@ -4,29 +4,36 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:background="@android:drawable/dialog_holo_light_frame"
-    android:padding="16dp"
-    android:layout_marginBottom="10dp">
+    android:padding="12dp"
+    android:layout_marginBottom="8dp"
+    android:background="@android:drawable/dialog_holo_light_frame">
 
     <TextView
         android:id="@+id/tvStopNumber"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:gravity="center"
+        android:layout_width="36dp"
+        android:layout_height="wrap_content"
         android:text="1"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"
+        android:textColor="#183153"
+        android:textSize="16sp"
         android:textStyle="bold"
-        android:background="#1976D2" />
+        android:gravity="center" />
 
     <TextView
         android:id="@+id/tvStopAddress"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:layout_marginStart="16dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
         android:text="Dirección de la parada"
         android:textColor="#183153"
-        android:textSize="16sp" />
+        android:textSize="15sp" />
+
+    <Button
+        android:id="@+id/btnCompleteStop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Completar"
+        android:textAllCaps="false" />
 
 </LinearLayout>

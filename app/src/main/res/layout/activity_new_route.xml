@@ -54,6 +54,27 @@
             android:padding="12dp"
             android:layout_marginTop="8dp" />
 
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Nombre de la ruta"
+            android:textColor="#183153"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="6dp" />
+
+        <EditText
+            android:id="@+id/etRouteName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Ej. Ruta Mañanas Móstoles"
+            android:inputType="textCapSentences"
+            android:maxLines="1"
+            android:padding="12dp"
+            android:background="@android:drawable/edit_text" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

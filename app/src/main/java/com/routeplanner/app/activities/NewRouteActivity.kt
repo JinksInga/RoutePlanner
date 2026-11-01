@@ -30,12 +30,16 @@ import kotlinx.coroutines.launch
 import com.routeplanner.app.RouteOptimizer
 import kotlinx.coroutines.flow.first
 import kotlin.jvm.java
+import com.routeplanner.app.data.database.entity.RouteEntity
+import com.routeplanner.app.data.database.entity.RouteStopEntity
+import com.routeplanner.app.repository.RouteRepository
 
 class NewRouteActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityNewRouteBinding
     private lateinit var adapter: RouteDestinationAdapter
     private lateinit var repository: DestinationRepository
+    private lateinit var routeRepository: RouteRepository
     private lateinit var fusedLocationClient:
             com.google.android.gms.location.FusedLocationProviderClient
     private lateinit var placesClient: PlacesClient
@@ -47,6 +51,7 @@ class NewRouteActivity : AppCompatActivity() {
     // Coordenadas del punto de partida
     private var selectedOriginLatitude: Double? = null
     private var selectedOriginLongitude: Double? = null
+    private var selectedOriginAddress: String? = null
 
     private val preferences by lazy {
         getSharedPreferences("route_preferences", MODE_PRIVATE)
@@ -99,9 +104,20 @@ class NewRouteActivity : AppCompatActivity() {
         configureButtons()
     }
 
+    //Así tendremos acceso tanto a las direcciones como a las rutas y sus paradas.
     private fun configureRepository() {
+
         val database = RouteDatabase.getDatabase(applicationContext)
-        repository = DestinationRepository(database.destinationDao())
+
+        repository = DestinationRepository(
+            database.destinationDao()
+        )
+
+        routeRepository = RouteRepository(
+            routeDao = database.routeDao(),
+            routeStopDao = database.routeStopDao(),
+            database = database
+        )
     }
 
     private fun configureRecyclerView() {
@@ -164,11 +180,15 @@ class NewRouteActivity : AppCompatActivity() {
 
     private fun calculateRoute() {
 
-        // Comprobar que existe un origen.
         val originLatitude = selectedOriginLatitude
         val originLongitude = selectedOriginLongitude
+        val originAddress = selectedOriginAddress
 
-        if (originLatitude == null || originLongitude == null) {
+        // Comprobar el origen.
+        if (originLatitude == null ||
+            originLongitude == null ||
+            originAddress == null
+        ) {
             Toast.makeText(
                 this,
                 "Primero debes seleccionar un punto de partida.",
@@ -177,7 +197,7 @@ class NewRouteActivity : AppCompatActivity() {
             return
         }
 
-        // Comprobar que hay destinos seleccionados.
+        // Comprobar los destinos seleccionados.
         val selectedIds = getSelectedDestinations()
 
         if (selectedIds.isEmpty()) {
@@ -189,7 +209,7 @@ class NewRouteActivity : AppCompatActivity() {
             return
         }
 
-        // Por ahora solo está implementada la optimización Greedy.
+        // Por ahora solo está implementado Greedy.
         if (!binding.rbNearest.isChecked) {
             Toast.makeText(
                 this,
@@ -200,13 +220,16 @@ class NewRouteActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            try {
-                // Recuperar los destinos guardados en Room.
-                val allDestinations = repository.getAllDestinations().first()
 
-                val selectedDestinations = allDestinations.filter {
-                    selectedIds.contains(it.id)
-                }
+            try {
+                // Recuperar los destinos guardados.
+                val allDestinations =
+                    repository.getAllDestinations().first()
+
+                val selectedDestinations =
+                    allDestinations.filter {
+                        selectedIds.contains(it.id)
+                    }
 
                 if (selectedDestinations.isEmpty()) {
                     Toast.makeText(
@@ -217,10 +240,11 @@ class NewRouteActivity : AppCompatActivity() {
                     return@launch
                 }
 
-                // Comprobar que todos tienen coordenadas.
-                val missingCoordinates = selectedDestinations.any {
-                    it.latitude == null || it.longitude == null
-                }
+                // Comprobar coordenadas.
+                val missingCoordinates =
+                    selectedDestinations.any {
+                        it.latitude == null || it.longitude == null
+                    }
 
                 if (missingCoordinates) {
                     Toast.makeText(
@@ -231,12 +255,13 @@ class NewRouteActivity : AppCompatActivity() {
                     return@launch
                 }
 
-                // Calcular el orden de las paradas.
-                val optimizedRoute = RouteOptimizer.optimizeNearestNeighbor(
-                    originLatitude,
-                    originLongitude,
-                    selectedDestinations
-                )
+                // Calcular el recorrido optimizado.
+                val optimizedRoute =
+                    RouteOptimizer.optimizeNearestNeighbor(
+                        originLatitude,
+                        originLongitude,
+                        selectedDestinations
+                    )
 
                 if (optimizedRoute.size != selectedDestinations.size) {
                     Toast.makeText(
@@ -247,23 +272,80 @@ class NewRouteActivity : AppCompatActivity() {
                     return@launch
                 }
 
-                // Enviar los identificadores en el orden calculado.
+                // Generar nombre para la ruta.
+                val routeName = binding.etRouteName.text
+                    .toString()
+                    .trim()
+
+                if (routeName.isBlank()) {
+                    Toast.makeText(
+                        this@NewRouteActivity,
+                        "Introduce un nombre para la ruta.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@launch
+                }
+
+                // Crear la entidad de ruta.
+                val route = RouteEntity(
+                    name = routeName,
+                    originAddress =  selectedOriginAddress ?: "Ubicación actual",//originAddress,
+                    originLatitude = originLatitude,
+                    originLongitude = originLongitude,
+                    optimizationType = "NEAREST"
+                )
+
+                // Crear las paradas respetando el orden calculado.
+                val stops = optimizedRoute.mapIndexed { index, destination ->
+
+                    RouteStopEntity(
+                        routeId = 0,
+                        destinationId = destination.id,
+                        addressSnapshot = destination.address,
+                        latitude = destination.latitude!!,
+                        longitude = destination.longitude!!,
+                        stopOrder = index + 1
+                    )
+                }
+
+                // Guardar la ruta y todas sus paradas.
+                val routeId = routeRepository.createRouteWithStops(
+                    route = route,
+                    stops = stops
+                )
+
+                Toast.makeText(
+                    this@NewRouteActivity,
+                    "Ruta guardada correctamente.",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                // Abrir la pantalla de resultados.
                 val intent = Intent(
                     this@NewRouteActivity,
                     RouteResultActivity::class.java
                 )
 
+                // Conservamos temporalmente los IDs para que la pantalla
+                // de resultados actual siga funcionando.
                 intent.putExtra(
                     RouteResultActivity.EXTRA_DESTINATION_IDS,
                     optimizedRoute.map { it.id }.toIntArray()
                 )
 
+                // También enviamos el identificador de la nueva ruta.
+                intent.putExtra(
+                    RouteResultActivity.EXTRA_ROUTE_ID,
+                    routeId.toInt()
+                )
+
                 startActivity(intent)
 
             } catch (e: Exception) {
+
                 Toast.makeText(
                     this@NewRouteActivity,
-                    "Error al calcular la ruta: ${e.localizedMessage}",
+                    "Error al guardar la ruta: ${e.localizedMessage}",
                     Toast.LENGTH_LONG
                 ).show()
             }
@@ -336,6 +418,7 @@ class NewRouteActivity : AppCompatActivity() {
 
                     selectedOriginLatitude = location.latitude
                     selectedOriginLongitude = location.longitude
+                    selectedOriginAddress = "Ubicación actual"
 
                     binding.tvSelectedOrigin.text =
                         "Ubicación actual seleccionada\n" +
@@ -452,6 +535,8 @@ class NewRouteActivity : AppCompatActivity() {
 
                 selectedOriginLatitude = location.latitude
                 selectedOriginLongitude = location.longitude
+
+                selectedOriginAddress = address
 
                 binding.tvSelectedOrigin.text =
                     "$address\n" +

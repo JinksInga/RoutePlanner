@@ -4,6 +4,11 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.routeplanner.app.databinding.ActivityMainBinding
+import android.content.Intent
+import androidx.lifecycle.lifecycleScope
+import com.routeplanner.app.data.database.RouteDatabase
+import com.routeplanner.app.repository.RouteRepository
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity()
 {
@@ -29,11 +34,23 @@ class MainActivity : AppCompatActivity()
     private fun configureButtons()
     {
         binding.btnNewRoute.setOnClickListener {
-            val intent = android.content.Intent(
+
+            // Limpiar las direcciones seleccionadas de la ruta anterior
+            getSharedPreferences("route_preferences",
+                MODE_PRIVATE).edit()
+                .remove("selected_destination_ids")
+                .apply()
+
+            val intent = Intent(
                 this,
                 NewRouteActivity::class.java
             )
+
             startActivity(intent)
+        }
+
+        binding.btnContinueRoute.setOnClickListener {
+            continueRoute()
         }
 
         binding.btnDestinations.setOnClickListener {
@@ -50,6 +67,49 @@ class MainActivity : AppCompatActivity()
 
         binding.btnSettings.setOnClickListener {
             showMessage("Configuración")
+        }
+    }
+
+    private fun continueRoute() {
+        lifecycleScope.launch {
+            try {
+                val database = RouteDatabase.getDatabase(applicationContext)
+
+                val routeRepository = RouteRepository(
+                    routeDao = database.routeDao(),
+                    routeStopDao = database.routeStopDao(),
+                    database = database
+                )
+
+                val currentRoute = routeRepository.getCurrentRoute()
+
+                if (currentRoute == null) {
+                    Toast.makeText(
+                        this@MainActivity,
+                        "No hay ninguna ruta activa o pausada",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    val intent = Intent(
+                        this@MainActivity,
+                        RouteResultActivity::class.java
+                    )
+
+                    intent.putExtra(
+                        RouteResultActivity.EXTRA_ROUTE_ID,
+                        currentRoute.id
+                    )
+
+                    startActivity(intent)
+                }
+
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@MainActivity,
+                    "Error al recuperar la ruta: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
 

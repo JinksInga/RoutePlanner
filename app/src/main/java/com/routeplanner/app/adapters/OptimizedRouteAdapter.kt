@@ -1,28 +1,37 @@
+
 package com.routeplanner.app.adapters
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.routeplanner.app.R
-import com.routeplanner.app.data.database.entity.DestinationEntity
+import com.routeplanner.app.data.database.entity.RouteStopEntity
 
-class OptimizedRouteAdapter :
-    RecyclerView.Adapter<OptimizedRouteAdapter.RouteViewHolder>() {
+class OptimizedRouteAdapter(
+    private val onCompleteStop: ((RouteStopEntity) -> Unit)? = null,
+    private val showCompleteButton: Boolean = false
+) : RecyclerView.Adapter<OptimizedRouteAdapter.RouteViewHolder>() {
 
-    private val destinations = mutableListOf<DestinationEntity>()
+    private val destinations = mutableListOf<RouteStopEntity>()
 
-    class RouteViewHolder(
-        itemView: android.view.View
-    ) : RecyclerView.ViewHolder(itemView) {
+    // Referencias a los elementos de cada parada
+    class RouteViewHolder(itemView: View) :
+        RecyclerView.ViewHolder(itemView) {
 
         val tvStopNumber: TextView =
             itemView.findViewById(R.id.tvStopNumber)
 
         val tvStopAddress: TextView =
             itemView.findViewById(R.id.tvStopAddress)
+
+        val btnCompleteStop: Button =
+            itemView.findViewById(R.id.btnCompleteStop)
     }
 
+    // Crear cada elemento de la lista
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
@@ -34,30 +43,35 @@ class OptimizedRouteAdapter :
         return RouteViewHolder(view)
     }
 
+    // Mostrar los datos de cada parada
     override fun onBindViewHolder(
         holder: RouteViewHolder,
         position: Int
     ) {
-
         val destination = destinations[position]
 
-        holder.tvStopNumber.text = (position + 1).toString()
-        holder.tvStopAddress.text = destination.address
+        holder.tvStopNumber.text = destination.stopOrder.toString()
+        holder.tvStopAddress.text = destination.addressSnapshot
+
+        holder.btnCompleteStop.visibility =
+            if (onCompleteStop != null) View.VISIBLE else View.GONE
+
+        holder.btnCompleteStop.text =
+            if (showCompleteButton) "Completar" else "Reabrir"
+
+        holder.btnCompleteStop.setOnClickListener {
+            onCompleteStop?.invoke(destination)
+        }
     }
 
     override fun getItemCount(): Int {
         return destinations.size
     }
 
-    fun updateDestinations(newDestinations: List<DestinationEntity>) {
+    // Actualizar la lista de paradas
+    fun updateDestinations(newDestinations: List<RouteStopEntity>) {
         destinations.clear()
         destinations.addAll(newDestinations)
         notifyDataSetChanged()
     }
 }
-/*
-* ¿Qué hace el adaptador?
-- Recibe la lista de destinos ordenados.
-- Muestra el número de cada parada.
-- Muestra su dirección.
-- Actualiza la lista cuando recibe nuevos destinos.*/
