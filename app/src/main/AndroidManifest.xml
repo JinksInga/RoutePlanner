@@ -24,19 +24,23 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".activities.DestinationsActivity"
             android:exported="false" />
-
         <activity
             android:name=".activities.NewRouteActivity"
             android:exported="false" />
-
         <activity
             android:name=".activities.RouteResultActivity"
             android:exported="false" />
-
+        <activity
+            android:name=".activities.HistoryActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".activities.HistoryRouteActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

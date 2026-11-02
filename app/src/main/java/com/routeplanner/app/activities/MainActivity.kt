@@ -62,7 +62,11 @@ class MainActivity : AppCompatActivity()
         }
 
         binding.btnHistory.setOnClickListener {
-            showMessage("Historial de rutas")
+            val intent = Intent(
+                this,
+                HistoryActivity::class.java
+            )
+            startActivity(intent)
         }
 
         binding.btnSettings.setOnClickListener {

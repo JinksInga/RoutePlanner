@@ -33,6 +33,10 @@ import kotlin.jvm.java
 import com.routeplanner.app.data.database.entity.RouteEntity
 import com.routeplanner.app.data.database.entity.RouteStopEntity
 import com.routeplanner.app.repository.RouteRepository
+import android.location.Geocoder
+import java.util.Locale
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class NewRouteActivity : AppCompatActivity() {
 
@@ -397,6 +401,7 @@ class NewRouteActivity : AppCompatActivity() {
         }
     }
 
+
     private fun getCurrentLocation() {
 
         cancellationTokenSource?.cancel()
@@ -418,18 +423,40 @@ class NewRouteActivity : AppCompatActivity() {
 
                     selectedOriginLatitude = location.latitude
                     selectedOriginLongitude = location.longitude
-                    selectedOriginAddress = "Ubicación actual"
 
-                    binding.tvSelectedOrigin.text =
-                        "Ubicación actual seleccionada\n" +
-                                "Latitud: ${location.latitude}\n" +
-                                "Longitud: ${location.longitude}"
+                    lifecycleScope.launch {
 
-                    Toast.makeText(
-                        this,
-                        "Ubicación obtenida correctamente.",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                        val address = withContext(Dispatchers.IO) {
+                            try {
+                                val geocoder = Geocoder(
+                                    this@NewRouteActivity,
+                                    Locale("es", "ES")
+                                )
+
+                                @Suppress("DEPRECATION")
+                                geocoder.getFromLocation(
+                                    location.latitude,
+                                    location.longitude,
+                                    1
+                                )?.firstOrNull()?.getAddressLine(0)
+
+                            } catch (e: Exception) {
+                                null
+                            }
+                        }
+
+                        selectedOriginAddress = address
+                            ?: "Ubicación GPS (dirección no disponible)"
+
+                        binding.tvSelectedOrigin.text =
+                            "Punto de partida:\n$selectedOriginAddress"
+
+                        Toast.makeText(
+                            this@NewRouteActivity,
+                            "Ubicación obtenida correctamente.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
 
                 } else {
                     Toast.makeText(

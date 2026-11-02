@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="3dp"
+    app:cardUseCompatPadding="false">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Nombre de la ruta -->
+        <TextView
+            android:id="@+id/tvHistoryRouteName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ruta Mañanas Móstoles"
+            android:textColor="#183153"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <!-- Fecha -->
+        <TextView
+            android:id="@+id/tvHistoryRouteDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="01/11/2026"
+            android:textColor="#64748B"
+            android:textSize="13sp" />
+
+        <!-- Resumen de paradas -->
+        <TextView
+            android:id="@+id/tvHistoryRouteStops"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="12 paradas · 12 completadas"
+            android:textColor="#334155"
+            android:textSize="14sp" />
+
+        <!-- Botón para consultar -->
+        <Button
+            android:id="@+id/btnViewHistoryRoute"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="12dp"
+            android:text="Ver ruta" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>
