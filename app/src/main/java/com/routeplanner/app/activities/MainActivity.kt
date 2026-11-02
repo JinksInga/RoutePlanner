@@ -8,6 +8,7 @@ import android.content.Intent
 import androidx.lifecycle.lifecycleScope
 import com.routeplanner.app.data.database.RouteDatabase
 import com.routeplanner.app.repository.RouteRepository
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity()
@@ -86,32 +87,31 @@ class MainActivity : AppCompatActivity()
                     database = database
                 )
 
-                val currentRoute = routeRepository.getCurrentRoute()
+                val currentRoutes = routeRepository
+                    .getCurrentRoutes()
+                    .first()
 
-                if (currentRoute == null) {
+                if (currentRoutes.isEmpty()) {
                     Toast.makeText(
                         this@MainActivity,
-                        "No hay ninguna ruta activa o pausada",
+                        "No hay rutas pendientes de finalizar.",
                         Toast.LENGTH_SHORT
                     ).show()
-                } else {
-                    val intent = Intent(
-                        this@MainActivity,
-                        RouteResultActivity::class.java
-                    )
 
-                    intent.putExtra(
-                        RouteResultActivity.EXTRA_ROUTE_ID,
-                        currentRoute.id
-                    )
-
-                    startActivity(intent)
+                    return@launch
                 }
+
+                val intent = Intent(
+                    this@MainActivity,
+                    SelectRouteActivity::class.java
+                )
+
+                startActivity(intent)
 
             } catch (e: Exception) {
                 Toast.makeText(
                     this@MainActivity,
-                    "Error al recuperar la ruta: ${e.message}",
+                    "Error al cargar las rutas: ${e.message}",
                     Toast.LENGTH_LONG
                 ).show()
             }

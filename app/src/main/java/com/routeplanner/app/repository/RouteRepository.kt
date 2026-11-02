@@ -17,13 +17,6 @@ class RouteRepository(
     // Guardar una nueva ruta
     suspend fun insert(route: RouteEntity): Long {
         return database.withTransaction {
-
-            val currentRoutes = routeDao.countCurrentRoutes()
-
-            require(currentRoutes == 0) {
-                "Ya existe una ruta activa o pausada."
-            }
-
             routeDao.insert(route)
         }
     }
@@ -53,6 +46,11 @@ class RouteRepository(
         return routeDao.getCurrentRoute()
     }
 
+    // Obtener todas las rutas activas o pausadas
+    fun getCurrentRoutes(): Flow<List<RouteEntity>> {
+        return routeDao.getCurrentRoutes()
+    }
+
     // Obtener el historial de rutas finalizadas
     fun getFinishedRoutes(): Flow<List<RouteEntity>> {
         return routeDao.getFinishedRoutes()
@@ -68,10 +66,10 @@ class RouteRepository(
 
     // Reanudar una ruta
     suspend fun resumeRoute(routeId: Int) {
-        routeDao.updateStatus(
-            routeId = routeId,
-            newStatus = "ACTIVE"
-        )
+        database.withTransaction {
+            routeDao.pauseAllActiveRoutes()
+            routeDao.updateStatus(routeId, "ACTIVE")
+        }
     }
 
     // Finalizar una ruta
@@ -91,26 +89,18 @@ class RouteRepository(
         route: RouteEntity,
         stops: List<RouteStopEntity>
     ): Long {
-
         return database.withTransaction {
 
-            val currentRoutes = routeDao.countCurrentRoutes()
-
-            require(currentRoutes == 0) {
-                "Ya existe una ruta activa o pausada."
-            }
+            routeDao.pauseAllActiveRoutes()
 
             val routeId = routeDao.insert(route)
-
             val routeStops = stops.map { stop ->
                 stop.copy(
                     id = 0,
                     routeId = routeId.toInt()
                 )
             }
-
             routeStopDao.insertAll(routeStops)
-
             routeId
         }
     }

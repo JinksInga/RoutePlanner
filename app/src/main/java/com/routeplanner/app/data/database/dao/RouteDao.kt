@@ -66,6 +66,22 @@ interface RouteDao {
         WHERE status IN ('ACTIVE', 'PAUSED')
     """)
     suspend fun countCurrentRoutes(): Int
+
+    @Query("""
+    SELECT * FROM routes
+    WHERE status IN ('ACTIVE', 'PAUSED')
+    ORDER BY updatedAt DESC
+""")
+    fun getCurrentRoutes(): Flow<List<RouteEntity>>
+
+    @Query("""
+    UPDATE routes
+    SET status = 'PAUSED', updatedAt = :updatedAt
+    WHERE status = 'ACTIVE'
+""")
+    suspend fun pauseAllActiveRoutes(
+        updatedAt: Long = System.currentTimeMillis()
+    )
 }
 /*
 * ¿Qué funciones tendremos?

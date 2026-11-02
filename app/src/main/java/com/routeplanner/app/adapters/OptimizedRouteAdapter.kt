@@ -12,7 +12,8 @@ import com.routeplanner.app.data.database.entity.RouteStopEntity
 
 class OptimizedRouteAdapter(
     private val onCompleteStop: ((RouteStopEntity) -> Unit)? = null,
-    private val showCompleteButton: Boolean = false
+    private val showCompleteButton: Boolean = false,
+    private val onNavigateToStop: ((RouteStopEntity) -> Unit)? = null
 ) : RecyclerView.Adapter<OptimizedRouteAdapter.RouteViewHolder>() {
 
     private val destinations = mutableListOf<RouteStopEntity>()
@@ -61,6 +62,10 @@ class OptimizedRouteAdapter(
 
         holder.btnCompleteStop.setOnClickListener {
             onCompleteStop?.invoke(destination)
+        }
+
+        holder.itemView.setOnClickListener {
+            onNavigateToStop?.invoke(destination)
         }
     }
 
