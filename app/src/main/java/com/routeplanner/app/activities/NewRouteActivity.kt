@@ -213,8 +213,14 @@ class NewRouteActivity : AppCompatActivity() {
             return
         }
 
-        // Por ahora solo está implementado Greedy.
-        if (!binding.rbNearest.isChecked) {
+        // Recuperar el method de optimización guardado.
+        val optimizationType = getSharedPreferences(
+            "route_preferences",
+            MODE_PRIVATE
+        ).getString("optimization_type", "NEAREST")
+
+        // Comprobar si Google Routes API está seleccionado.
+        if (optimizationType == "GLOBAL") {
             Toast.makeText(
                 this,
                 "La optimización global todavía no está disponible.",

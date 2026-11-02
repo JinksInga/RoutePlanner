@@ -70,7 +70,8 @@ class MainActivity : AppCompatActivity()
         }
 
         binding.btnSettings.setOnClickListener {
-            showMessage("Configuración")
+            val intent = Intent(this, SettingsActivity::class.java)
+            startActivity(intent)
         }
     }
 
@@ -115,14 +116,5 @@ class MainActivity : AppCompatActivity()
                 ).show()
             }
         }
-    }
-
-    private fun showMessage(message: String)
-    {
-        Toast.makeText(
-            this,
-            "$message - Próximamente",
-            Toast.LENGTH_SHORT
-        ).show()
     }
 }
