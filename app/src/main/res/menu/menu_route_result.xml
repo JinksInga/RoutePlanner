@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_edit_route"
+        android:title="Modificar ruta"
+        android:icon="@drawable/ic_edit_24"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_pause_resume"
+        android:title="Pausar ruta"
+        android:icon="@drawable/ic_pause_24"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_finish_route"
+        android:title="Finalizar ruta"
+        app:showAsAction="never" />
+
+</menu>

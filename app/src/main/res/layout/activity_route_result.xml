@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:background="#F5F7FA"
     android:padding="16dp">
 
-    <!-- Cabecera -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -18,7 +17,6 @@
         app:titleTextColor="#183153"
         app:navigationIcon="@drawable/ic_arrow_back_24" />
 
-    <!-- Resumen -->
     <TextView
         android:id="@+id/tvRouteSummary"
         android:layout_width="match_parent"
@@ -26,64 +24,14 @@
         android:text="0 paradas en tu recorrido"
         android:textColor="#64748B"
         android:textSize="14sp"
-        android:paddingBottom="20dp" />
-
-    <Button
-        android:id="@+id/btnEditRoute"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_marginBottom="12dp"
-        android:text="Modificar ruta" />
-
-    <!-- Sección pendientes -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Pendientes"
-        android:textColor="#183153"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:paddingBottom="8dp" />
+        android:paddingBottom="12dp" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvPendingStops"
+        android:id="@+id/rvRouteStops"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:clipToPadding="false"
         android:paddingBottom="12dp" />
-
-    <!-- Sección completadas -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Completadas"
-        android:textColor="#183153"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvCompletedStops"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:clipToPadding="false"
-        android:paddingBottom="12dp" />
-
-    <Button
-        android:id="@+id/btnPauseResumeRoute"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_marginTop="12dp"
-        android:text="Pausar ruta" />
-
-    <Button
-        android:id="@+id/btnFinishRoute"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_marginTop="8dp"
-        android:text="Finalizar ruta" />
 
 </LinearLayout>

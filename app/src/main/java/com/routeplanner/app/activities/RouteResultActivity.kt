@@ -16,6 +16,11 @@ import com.routeplanner.app.repository.RouteStopRepository
 import kotlinx.coroutines.flow.collectLatest
 import android.content.Intent
 import android.net.Uri
+import android.view.Menu
+import android.view.MenuItem
+import androidx.recyclerview.widget.ConcatAdapter
+import com.routeplanner.app.R
+import com.routeplanner.app.adapters.RouteHeaderAdapter
 import kotlinx.coroutines.flow.first
 
 class RouteResultActivity : AppCompatActivity() {
@@ -26,9 +31,10 @@ class RouteResultActivity : AppCompatActivity() {
     }
 
     private lateinit var binding: ActivityRouteResultBinding
-    //private lateinit var adapter: OptimizedRouteAdapter
     private lateinit var pendingAdapter: OptimizedRouteAdapter
     private lateinit var completedAdapter: OptimizedRouteAdapter
+    private lateinit var pendingHeaderAdapter: RouteHeaderAdapter
+    private lateinit var completedHeaderAdapter: RouteHeaderAdapter
     private lateinit var repository: DestinationRepository
     private lateinit var routeRepository: RouteRepository
     private lateinit var routeStopRepository: RouteStopRepository
@@ -62,7 +68,7 @@ class RouteResultActivity : AppCompatActivity() {
             database = database
         )
 
-        binding.btnEditRoute.setOnClickListener {
+        /*binding.btnEditRoute.setOnClickListener {
             val routeId = intent.getIntExtra(EXTRA_ROUTE_ID, -1)
 
             if (routeId != -1) {
@@ -74,18 +80,49 @@ class RouteResultActivity : AppCompatActivity() {
                 editIntent.putExtra(EXTRA_ROUTE_ID, routeId)
                 startActivity(editIntent)
             }
-        }
+        }*/
 
-        binding.btnFinishRoute.setOnClickListener {
-            confirmFinishRoute()
-        }
-
-        binding.btnPauseResumeRoute.setOnClickListener {
-            togglePauseResumeRoute()
-        }
 
         configureRecyclerView()
         loadRoute()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_route_result, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+        return when (item.itemId) {
+
+            R.id.action_edit_route -> {
+                val routeId = intent.getIntExtra(EXTRA_ROUTE_ID, -1)
+
+                if (routeId != -1) {
+                    val editIntent = Intent(
+                        this,
+                        EditRouteActivity::class.java
+                    )
+                    editIntent.putExtra(EXTRA_ROUTE_ID, routeId)
+                    startActivity(editIntent)
+                }
+
+                true
+            }
+
+            R.id.action_pause_resume -> {
+                togglePauseResumeRoute()
+                true
+            }
+
+            R.id.action_finish_route -> {
+                confirmFinishRoute()
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     private fun togglePauseResumeRoute() {
@@ -133,7 +170,7 @@ class RouteResultActivity : AppCompatActivity() {
                     ).show()
                 }
 
-                updatePauseResumeButton(
+                updatePauseResumeMenuItem(
                     if (route.status == "ACTIVE") "PAUSED" else "ACTIVE"
                 )
 
@@ -147,12 +184,25 @@ class RouteResultActivity : AppCompatActivity() {
         }
     }
 
-    private fun updatePauseResumeButton(status: String) {
+    private fun updatePauseResumeMenuItem(status: String) {
 
-        binding.btnPauseResumeRoute.text = when (status) {
-            "PAUSED" -> "Reanudar ruta"
-            else -> "Pausar ruta"
+        val menuItem = binding.toolbar.menu.findItem(
+            R.id.action_pause_resume
+        )
+
+        menuItem?.title = if (status == "PAUSED") {
+            "Reanudar ruta"
+        } else {
+            "Pausar ruta"
         }
+
+        menuItem?.setIcon(
+            if (status == "PAUSED") {
+                R.drawable.ic_play_24
+            } else {
+                R.drawable.ic_pause_24
+            }
+        )
     }
 
     private fun confirmFinishRoute() {
@@ -203,6 +253,12 @@ class RouteResultActivity : AppCompatActivity() {
 
     private fun configureRecyclerView() {
 
+        // Encabezado de pendientes
+        pendingHeaderAdapter = RouteHeaderAdapter("Pendientes")
+
+        // Encabezado de completadas
+        completedHeaderAdapter = RouteHeaderAdapter("Completadas")
+
         // Adaptador de paradas pendientes
         pendingAdapter = OptimizedRouteAdapter(
             onCompleteStop = { stop ->
@@ -225,17 +281,19 @@ class RouteResultActivity : AppCompatActivity() {
             }
         )
 
-        binding.rvPendingStops.layoutManager =
+        // Un único RecyclerView con los cuatro adaptadores
+        val concatAdapter = ConcatAdapter(
+            pendingHeaderAdapter,
+            pendingAdapter,
+            completedHeaderAdapter,
+            completedAdapter
+        )
+
+        binding.rvRouteStops.layoutManager =
             LinearLayoutManager(this)
 
-        binding.rvPendingStops.adapter = pendingAdapter
-
-        binding.rvCompletedStops.layoutManager =
-            LinearLayoutManager(this)
-
-        binding.rvCompletedStops.adapter = completedAdapter
+        binding.rvRouteStops.adapter = concatAdapter
     }
-
 
     private fun navigateToStop(stop: RouteStopEntity) {
 
@@ -410,7 +468,7 @@ class RouteResultActivity : AppCompatActivity() {
             }
 
             binding.toolbar.title = route.name
-            updatePauseResumeButton(route.status)
+            updatePauseResumeMenuItem(route.status)
 
             routeStopRepository
                 .getStopsByRoute(routeId)
@@ -432,8 +490,13 @@ class RouteResultActivity : AppCompatActivity() {
                         .filter { it.isCompleted }
                         .sortedBy { it.completedAt }
 
+                    // Actualizar las dos listas
                     pendingAdapter.updateDestinations(pendingStops)
                     completedAdapter.updateDestinations(completedStops)
+
+                    // Actualizar los contadores
+                    pendingHeaderAdapter.updateCount(pendingStops.size)
+                    completedHeaderAdapter.updateCount(completedStops.size)
 
                     val completedCount = completedStops.size
 

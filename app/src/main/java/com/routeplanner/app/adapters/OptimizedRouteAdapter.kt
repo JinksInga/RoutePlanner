@@ -22,8 +22,14 @@ class OptimizedRouteAdapter(
     class RouteViewHolder(itemView: View) :
         RecyclerView.ViewHolder(itemView) {
 
+        val card: com.google.android.material.card.MaterialCardView =
+            itemView as com.google.android.material.card.MaterialCardView
+
         val tvStopNumber: TextView =
             itemView.findViewById(R.id.tvStopNumber)
+
+        val tvStopCheck: TextView =
+            itemView.findViewById(R.id.tvStopCheck)
 
         val tvStopAddress: TextView =
             itemView.findViewById(R.id.tvStopAddress)
@@ -54,6 +60,45 @@ class OptimizedRouteAdapter(
         holder.tvStopNumber.text = destination.stopOrder.toString()
         holder.tvStopAddress.text = destination.addressSnapshot
 
+        if (showCompleteButton) {
+            // Parada pendiente
+            holder.card.setCardBackgroundColor(
+                android.graphics.Color.WHITE
+            )
+
+            holder.tvStopNumber.visibility = View.VISIBLE
+            holder.tvStopCheck.visibility = View.GONE
+
+            holder.tvStopNumber.setTextColor(
+                android.graphics.Color.parseColor("#183153")
+            )
+
+            holder.tvStopAddress.setTextColor(
+                android.graphics.Color.parseColor("#183153")
+            )
+
+            holder.tvStopAddress.paintFlags =
+                holder.tvStopAddress.paintFlags and
+                        android.graphics.Paint.STRIKE_THRU_TEXT_FLAG.inv()
+
+        } else {
+            // Parada completada
+            holder.card.setCardBackgroundColor(
+                android.graphics.Color.parseColor("#F0FDF4")
+            )
+
+            holder.tvStopNumber.visibility = View.VISIBLE
+            holder.tvStopCheck.visibility = View.GONE
+
+            holder.tvStopNumber.setTextColor(
+                android.graphics.Color.parseColor("#15803D")
+            )
+
+            holder.tvStopAddress.paintFlags =
+                holder.tvStopAddress.paintFlags or
+                        android.graphics.Paint.STRIKE_THRU_TEXT_FLAG
+        }
+
         holder.btnCompleteStop.visibility =
             if (onCompleteStop != null) View.VISIBLE else View.GONE
 
@@ -65,7 +110,9 @@ class OptimizedRouteAdapter(
         }
 
         holder.itemView.setOnClickListener {
-            onNavigateToStop?.invoke(destination)
+            if (showCompleteButton) {
+                onNavigateToStop?.invoke(destination)
+            }
         }
     }
 
