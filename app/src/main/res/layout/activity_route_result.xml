@@ -28,6 +28,13 @@
         android:textSize="14sp"
         android:paddingBottom="20dp" />
 
+    <Button
+        android:id="@+id/btnEditRoute"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginBottom="12dp"
+        android:text="Modificar ruta" />
+
     <!-- Sección pendientes -->
     <TextView
         android:layout_width="match_parent"

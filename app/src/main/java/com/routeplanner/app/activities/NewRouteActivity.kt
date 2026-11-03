@@ -106,6 +106,9 @@ class NewRouteActivity : AppCompatActivity() {
         configureRecyclerView()
         observeDestinations()
         configureButtons()
+
+        loadOptimizationPreference()
+        checkLocationPermission()
     }
 
     //Así tendremos acceso tanto a las direcciones como a las rutas y sus paradas.
@@ -179,6 +182,19 @@ class NewRouteActivity : AppCompatActivity() {
 
         binding.btnCalculateRoute.setOnClickListener {
             calculateRoute()
+        }
+    }
+
+    private fun loadOptimizationPreference() {
+
+        val optimizationType = preferences.getString(
+            "optimization_type",
+            "NEAREST"
+        )
+
+        when (optimizationType) {
+            "GLOBAL" -> binding.rbGlobal.isChecked = true
+            else -> binding.rbNearest.isChecked = true
         }
     }
 
@@ -350,6 +366,7 @@ class NewRouteActivity : AppCompatActivity() {
                 )
 
                 startActivity(intent)
+                finish()
 
             } catch (e: Exception) {
 

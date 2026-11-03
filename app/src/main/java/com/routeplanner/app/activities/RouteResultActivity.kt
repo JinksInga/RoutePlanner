@@ -62,6 +62,20 @@ class RouteResultActivity : AppCompatActivity() {
             database = database
         )
 
+        binding.btnEditRoute.setOnClickListener {
+            val routeId = intent.getIntExtra(EXTRA_ROUTE_ID, -1)
+
+            if (routeId != -1) {
+                val editIntent = Intent(
+                    this,
+                    EditRouteActivity::class.java
+                )
+
+                editIntent.putExtra(EXTRA_ROUTE_ID, routeId)
+                startActivity(editIntent)
+            }
+        }
+
         binding.btnFinishRoute.setOnClickListener {
             confirmFinishRoute()
         }
