@@ -4,11 +4,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.routeplanner.app.adapters.HistoryAdapter
 import com.routeplanner.app.data.database.RouteDatabase
+import com.routeplanner.app.data.database.entity.RouteEntity
 import com.routeplanner.app.databinding.ActivityHistoryBinding
 import com.routeplanner.app.repository.RouteRepository
 import kotlinx.coroutines.flow.collectLatest
@@ -53,16 +55,53 @@ class HistoryActivity : AppCompatActivity() {
     }
 
     private fun configureRecyclerView() {
-        adapter = HistoryAdapter { route ->
-            val intent = Intent(this,HistoryRouteActivity::class.java)
-            intent.putExtra(RouteResultActivity.EXTRA_ROUTE_ID,route.id)
-            startActivity(intent)
-        }
+
+        adapter = HistoryAdapter(
+            onViewRoute = { route ->
+                val intent = Intent(this, HistoryRouteActivity::class.java)
+                intent.putExtra(RouteResultActivity.EXTRA_ROUTE_ID, route.id)
+                startActivity(intent)
+            },
+            onDeleteRoute = { route ->
+                confirmDeleteHistoryRoute(route)
+            }
+        )
 
         binding.rvHistory.layoutManager =
             LinearLayoutManager(this)
 
         binding.rvHistory.adapter = adapter
+    }
+
+    private fun confirmDeleteHistoryRoute(route: RouteEntity) {
+
+        AlertDialog.Builder(this)
+            .setTitle("Eliminar ruta")
+            .setMessage("¿Estás seguro de que quieres eliminar la ruta \"${route.name}\" del historial? Esta acción no se puede deshacer.")
+            .setNegativeButton("Cancelar", null)
+            .setPositiveButton("Eliminar") { _, _ ->
+
+                lifecycleScope.launch {
+                    try {
+                        routeRepository.delete(route)
+
+                        Toast.makeText(
+                            this@HistoryActivity,
+                            "Ruta eliminada correctamente",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                    } catch (e: Exception) {
+
+                        Toast.makeText(
+                            this@HistoryActivity,
+                            "Error al eliminar la ruta",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
+            .show()
     }
 
     private fun observeFinishedRoutes() {

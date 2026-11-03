@@ -7,6 +7,7 @@ import com.routeplanner.app.data.database.dao.RouteStopDao
 import com.routeplanner.app.data.database.entity.RouteEntity
 import com.routeplanner.app.data.database.entity.RouteStopEntity
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 
 class RouteRepository(
     private val routeDao: RouteDao,
@@ -104,18 +105,25 @@ class RouteRepository(
             routeId
         }
     }
+
+    // Obtener todas las paradas de una ruta
+    suspend fun getStopsForRoute(routeId: Int): List<RouteStopEntity> {
+        return routeStopDao.getStopsByRoute(routeId).first()
+    }
+
+    // Eliminar una ruta pendiente y sus paradas
+    suspend fun deletePendingRoute(routeId: Int) {
+        database.withTransaction {
+            val route = routeDao.getById(routeId)
+                ?: return@withTransaction
+
+            if (route.status == "FINISHED") {
+                throw IllegalStateException(
+                    "No se pueden eliminar rutas finalizadas desde aquí."
+                )
+            }
+
+            routeDao.delete(route)
+        }
+    }
 }
-/*
-* ¿Qué hemos conseguido?
-El repositorio nos permitirá:
-- Crear rutas comprobando que no exista otra activa o pausada.
-- Consultar rutas guardadas e historial.
-- Recuperar la ruta en curso.
-- Pausar, reanudar y finalizar recorridos.
-- Eliminar rutas y sus paradas asociadas gracias a la relación que configuramos en Room.
-* Además, utilizamos withTransaction para que la comprobación y la inserción de una ruta
-  se realicen dentro de una misma transacción.
-* Una nota: esta comprobación protege las creaciones realizadas mediante este repositorio,
-  pero más adelante también tendremos que centralizar las operaciones de reanudación para
-  garantizar que nunca se active una segunda ruta.
-**/

@@ -53,6 +53,14 @@
             android:layout_marginTop="12dp"
             android:text="Ver ruta" />
 
-    </LinearLayout>
+        <Button
+            android:id="@+id/btnDeleteHistoryRoute"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Eliminar ruta"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#C62828" />
 
+    </LinearLayout>
 </androidx.cardview.widget.CardView>

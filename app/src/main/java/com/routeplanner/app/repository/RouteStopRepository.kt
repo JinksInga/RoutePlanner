@@ -68,18 +68,3 @@ class RouteStopRepository(
         return routeStopDao.countCompletedStops(routeId)
     }
 }
-/*
-* ¿Qué tendremos disponible?
-Funcionalidad	Méthod
-- Guardar una parada	insert()
-- Guardar varias paradas	insertAll()
-- Consultar todas	getStopsByRoute()
-- Consultar pendientes	getPendingStops()
-- Consultar completadas	getCompletedStops()
-- Confirmar visita	completeStop()
-- Reabrir una parada	reopenStop()
-- Contar paradas	countStops()
-- Contar completadas	countCompletedStops()
-* Los cambios de estado se guardarán directamente en SQLite, por lo que el progreso
-  sobrevivirá al cierre de la aplicación.
-**/

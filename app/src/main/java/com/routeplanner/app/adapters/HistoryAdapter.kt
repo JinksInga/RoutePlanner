@@ -13,7 +13,8 @@ import java.util.Date
 import java.util.Locale
 
 class HistoryAdapter(
-    private val onViewRoute: (RouteEntity) -> Unit
+    private val onViewRoute: (RouteEntity) -> Unit,
+    private val onDeleteRoute: (RouteEntity) -> Unit
 ) : RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
 
     private val routes = mutableListOf<RouteEntity>()
@@ -32,6 +33,9 @@ class HistoryAdapter(
 
         val btnViewRoute: Button =
             itemView.findViewById(R.id.btnViewHistoryRoute)
+
+        val btnDeleteRoute: Button =
+            itemView.findViewById(R.id.btnDeleteHistoryRoute)
     }
 
     override fun onCreateViewHolder(
@@ -67,6 +71,10 @@ class HistoryAdapter(
         holder.btnViewRoute.setOnClickListener {
             onViewRoute(route)
         }
+
+        holder.btnDeleteRoute.setOnClickListener {
+            onDeleteRoute(route)
+        }
     }
 
     override fun getItemCount(): Int = routes.size
@@ -77,11 +85,3 @@ class HistoryAdapter(
         notifyDataSetChanged()
     }
 }
-/*
-* Qué hace nuestro adaptador
-- Recupera el nombre de cada ruta.
-- Formatea la fecha de creación.
-- Muestra que la ruta está finalizada.
-- Permite pulsar «Ver ruta».
-- Actualiza la lista cuando recibe nuevos datos de Room.
-* */

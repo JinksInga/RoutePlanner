@@ -95,14 +95,22 @@ interface RouteStopDao {
         AND isCompleted = 1
     """)
     suspend fun countCompletedStops(routeId: Int): Int
+
+    // Eliminar una parada por su identificador
+    @Query("""
+    DELETE FROM route_stops
+    WHERE id = :stopId
+""")
+    suspend fun deleteById(stopId: Int)
+
+    // Actualizar el orden de una parada
+    @Query("""
+    UPDATE route_stops
+    SET stopOrder = :newOrder
+    WHERE id = :stopId
+""")
+    suspend fun updateStopOrder(
+        stopId: Int,
+        newOrder: Int
+    )
 }
-/*
-* ¿Qué podremos hacer con este DAO?
-- Recuperar todas las paradas respetando el orden original.
-- Consultar pendientes y completadas por separado.
-- Confirmar manualmente una parada.
-- Volver a dejar una parada como pendiente si fuera necesario.
-- Consultar cuántas paradas tiene una ruta y cuántas se han completado.
-* Una ventaja importante es que las paradas completadas se ordenarán por fecha de visita,
-  mientras que las pendientes conservarán el orden calculado de la ruta.
-**/

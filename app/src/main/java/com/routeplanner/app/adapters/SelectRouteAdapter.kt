@@ -16,7 +16,9 @@ data class RouteSelectionItem(
 )
 
 class SelectRouteAdapter(
-    private val onSelectRoute: (RouteEntity) -> Unit
+    private val onSelectRoute: (RouteEntity) -> Unit,
+    private val onEditRoute: (RouteEntity) -> Unit,
+    private val onDeleteRoute: (RouteEntity) -> Unit
 ) : RecyclerView.Adapter<SelectRouteAdapter.RouteViewHolder>() {
 
     private val routes = mutableListOf<RouteSelectionItem>()
@@ -24,17 +26,12 @@ class SelectRouteAdapter(
     class RouteViewHolder(itemView: View) :
         RecyclerView.ViewHolder(itemView) {
 
-        val tvRouteName: TextView =
-            itemView.findViewById(R.id.tvRouteName)
-
-        val tvRouteStatus: TextView =
-            itemView.findViewById(R.id.tvRouteStatus)
-
-        val tvRouteProgress: TextView =
-            itemView.findViewById(R.id.tvRouteProgress)
-
-        val btnSelectRoute: Button =
-            itemView.findViewById(R.id.btnSelectRoute)
+        val tvRouteName: TextView = itemView.findViewById(R.id.tvRouteName)
+        val tvRouteStatus: TextView = itemView.findViewById(R.id.tvRouteStatus)
+        val tvRouteProgress: TextView = itemView.findViewById(R.id.tvRouteProgress)
+        val btnSelectRoute: Button = itemView.findViewById(R.id.btnSelectRoute)
+        val btnEditRoute: Button = itemView.findViewById(R.id.btnEditRoute)
+        val btnDeleteRoute: Button = itemView.findViewById(R.id.btnDeleteRoute)
     }
 
     override fun onCreateViewHolder(
@@ -57,29 +54,19 @@ class SelectRouteAdapter(
         holder.tvRouteName.text = route.name
 
         holder.tvRouteStatus.text =
-            if (route.status == "ACTIVE") {
-                "En curso"
-            } else {
-                "Pausada"
-            }
+            if (route.status == "ACTIVE") "En curso" else "Pausada"
 
         holder.tvRouteProgress.text =
             "Paradas completadas: ${item.completedStops} de ${item.totalStops}"
 
         holder.btnSelectRoute.text =
-            if (route.status == "ACTIVE") {
-                "Abrir ruta"
-            } else {
-                "Reanudar ruta"
-            }
+            if (route.status == "ACTIVE") "Abrir ruta" else "Reanudar ruta"
 
-        holder.btnSelectRoute.setOnClickListener {
-            onSelectRoute(route)
-        }
+        holder.btnSelectRoute.setOnClickListener { onSelectRoute(route) }
 
-        holder.itemView.setOnClickListener {
-            onSelectRoute(route)
-        }
+        holder.btnEditRoute.setOnClickListener { onEditRoute(route) }
+
+        holder.btnDeleteRoute.setOnClickListener { onDeleteRoute(route) }
     }
 
     override fun getItemCount(): Int = routes.size

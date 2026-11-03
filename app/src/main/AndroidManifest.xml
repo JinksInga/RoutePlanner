@@ -48,6 +48,9 @@
         <activity
             android:name=".activities.SelectRouteActivity"
             android:exported="false" />
+        <activity
+            android:name=".activities.EditRouteActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

@@ -45,17 +45,75 @@ class SelectRouteActivity : AppCompatActivity() {
         binding.toolbar.setNavigationOnClickListener {
             finish()
         }
+    }
 
+    override fun onResume() {
+        super.onResume()
         loadRoutes()
     }
 
     private fun configureRecyclerView() {
-        adapter = SelectRouteAdapter { route ->
-            openRoute(route)
-        }
+        adapter = SelectRouteAdapter(
+            onSelectRoute = { route ->
+                openRoute(route)
+            },
+            onEditRoute = { route ->
+                val intent = Intent(
+                    this,
+                    EditRouteActivity::class.java
+                )
+
+                intent.putExtra(
+                    RouteResultActivity.EXTRA_ROUTE_ID,
+                    route.id
+                )
+
+                startActivity(intent)
+            },
+            onDeleteRoute = { route ->
+                confirmDeleteRoute(route)
+            }
+        )
 
         binding.rvCurrentRoutes.layoutManager = LinearLayoutManager(this)
         binding.rvCurrentRoutes.adapter = adapter
+    }
+
+    private fun confirmDeleteRoute(route: RouteEntity) {
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Eliminar ruta")
+            .setMessage(
+                "¿Estás seguro de que quieres eliminar la ruta " +
+                        "\"${route.name}\"?\n\n" +
+                        "También se eliminarán todas sus paradas y su progreso. " +
+                        "Esta acción no se puede deshacer."
+            )
+            .setNegativeButton("Cancelar", null)
+            .setPositiveButton("Eliminar") { _, _ ->
+
+                lifecycleScope.launch {
+                    try {
+                        routeRepository.delete(route)
+
+                        Toast.makeText(
+                            this@SelectRouteActivity,
+                            "Ruta eliminada correctamente.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        loadRoutes()
+
+                    } catch (e: Exception) {
+                        Toast.makeText(
+                            this@SelectRouteActivity,
+                            "Error al eliminar la ruta: ${e.message}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
+            .show()
     }
 
     private fun loadRoutes() {

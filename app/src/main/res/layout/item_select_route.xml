@@ -44,6 +44,22 @@
             android:textSize="14sp" />
 
         <Button
+            android:id="@+id/btnEditRoute"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Modificar ruta"
+            android:layout_marginTop="8dp" />
+
+        <Button
+            android:id="@+id/btnDeleteRoute"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Eliminar ruta"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#C62828" />
+
+        <Button
             android:id="@+id/btnSelectRoute"
             android:layout_width="match_parent"
             android:layout_height="48dp"
