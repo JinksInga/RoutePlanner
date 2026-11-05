@@ -1,72 +1,322 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="#F5F7FA">
+    android:background="#F4F9FF">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="20dp">
 
+        <!-- CABECERA -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Route Planner"
             android:textSize="30sp"
             android:textStyle="bold"
-            android:textColor="#183153"
-            android:layout_marginTop="32dp"/>
+            android:textColor="#103B75"
+            android:layout_marginTop="4dp"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="GESTIÓN INTELIGENTE DE RUTAS"
             android:textSize="12sp"
-            android:textColor="#607080"
-            android:layout_marginTop="6dp"
-            android:layout_marginBottom="32dp"/>
+            android:textColor="#526985"
+            android:letterSpacing="0.06"
+            android:layout_marginTop="5dp"/>
 
-        <Button
-            android:id="@+id/btnNewRoute"
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:text="Nueva ruta"
-            android:textSize="17sp"/>
+            android:layout_height="wrap_content"
+            android:text="¿Qué quieres hacer hoy?"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#103B75"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="16dp"/>
 
-        <Button
-            android:id="@+id/btnContinueRoute"
+        <!-- NUEVA RUTA -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cvNewRoute"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:text="Continuar ruta"
-            android:textSize="17sp"
-            android:layout_marginTop="16dp"/>
+            android:layout_height="145dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="3dp"
+            app:strokeWidth="0dp">
 
-        <Button
-            android:id="@+id/btnDestinations"
-            android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:text="Mis direcciones"
-            android:textSize="17sp"
-            android:layout_marginTop="16dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="20dp">
 
-        <Button
-            android:id="@+id/btnHistory"
-            android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:text="Historial de rutas"
-            android:textSize="17sp"
-            android:layout_marginTop="16dp"/>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-        <Button
-            android:id="@+id/btnSettings"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Nueva ruta"
+                        android:textSize="21sp"
+                        android:textStyle="bold"
+                        android:textColor="#103B75"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Planifica un nuevo recorrido"
+                        android:textSize="13sp"
+                        android:textColor="#60758F"
+                        android:layout_marginTop="7dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="COMENZAR  →"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:textColor="#1565C0"
+                        android:layout_marginTop="13dp"/>
+
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="76dp"
+                    android:layout_height="76dp"
+                    android:src="@drawable/ic_add_route"
+                    android:background="#EAF2FF"
+                    android:padding="12dp"
+                    android:contentDescription="Nueva ruta"/>
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- SEGUNDA FILA -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:text="Configuración"
-            android:textSize="17sp"
-            android:layout_marginTop="16dp"/>
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
+
+            <!-- CONTINUAR RUTA -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cvContinueRoute"
+                android:layout_width="0dp"
+                android:layout_height="175dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="3dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
+                        android:src="@drawable/ic_continue_route"
+                        android:contentDescription="Continuar ruta"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Continuar ruta"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#103B75"
+                        android:layout_marginTop="9dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Retoma tu recorrido"
+                        android:textSize="12sp"
+                        android:textColor="#60758F"
+                        android:layout_marginTop="5dp"/>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- DIRECCIONES -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cvDestinations"
+                android:layout_width="0dp"
+                android:layout_height="175dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="3dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
+                        android:src="@drawable/ic_destinations"
+                        android:contentDescription="Mis direcciones"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Mis direcciones"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#103B75"
+                        android:layout_marginTop="9dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Gestiona tus destinos"
+                        android:textSize="12sp"
+                        android:textColor="#60758F"
+                        android:layout_marginTop="5dp"/>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
+        <!-- TERCERA FILA -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
+
+            <!-- HISTORIAL -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cvHistory"
+                android:layout_width="0dp"
+                android:layout_height="175dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="3dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
+                        android:src="@drawable/ic_history"
+                        android:contentDescription="Historial"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Historial"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#103B75"
+                        android:layout_marginTop="9dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Consulta tus recorridos"
+                        android:textSize="12sp"
+                        android:textColor="#60758F"
+                        android:layout_marginTop="5dp"/>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- CONFIGURACIÓN -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cvSettings"
+                android:layout_width="0dp"
+                android:layout_height="175dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="3dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
+                        android:src="@drawable/ic_settings"
+                        android:contentDescription="Configuración"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Configuración"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#103B75"
+                        android:layout_marginTop="9dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Personaliza la aplicación"
+                        android:textSize="12sp"
+                        android:textColor="#60758F"
+                        android:layout_marginTop="5dp"/>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
 
     </LinearLayout>
+
 </ScrollView>

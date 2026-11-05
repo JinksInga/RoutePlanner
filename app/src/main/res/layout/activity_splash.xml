@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp"
+    android:background="#F4F9FF">
+
+    <!-- Mapa animado -->
+    <com.routeplanner.app.activities.RouteMapAnimationView
+        android:id="@+id/routeMap"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:contentDescription="Mapa con ruta de navegación"/>
+
+    <!-- Nombre de la aplicación -->
+    <TextView
+        android:id="@+id/txtTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:text="Route Planner"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        android:textColor="#103B75"
+        android:fontFamily="sans"
+        android:alpha="0"/>
+
+    <!-- Eslogan animado -->
+    <LinearLayout
+        android:id="@+id/layoutSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="12dp">
+
+        <TextView
+            android:id="@+id/txtPlanifica"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Planifica"
+            android:textSize="16sp"
+            android:textStyle="normal"
+            android:textColor="#244D7D"
+            android:alpha="0"/>
+
+        <TextView
+            android:id="@+id/dot1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" • "
+            android:textSize="18sp"
+            android:textColor="#2196F3"
+            android:alpha="0"/>
+
+        <TextView
+            android:id="@+id/txtCalcula"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Calcula"
+            android:textSize="16sp"
+            android:textStyle="normal"
+            android:textColor="#244D7D"
+            android:alpha="0"/>
+
+        <TextView
+            android:id="@+id/dot2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" • "
+            android:textSize="18sp"
+            android:textColor="#2196F3"
+            android:alpha="0"/>
+
+        <TextView
+            android:id="@+id/txtOptimiza"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Optimiza"
+            android:textSize="16sp"
+            android:textStyle="normal"
+            android:textColor="#244D7D"
+            android:alpha="0"/>
+
+        <TextView
+            android:id="@+id/dot3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" • "
+            android:textSize="18sp"
+            android:textColor="#2196F3"
+            android:alpha="0"/>
+
+    </LinearLayout>
+
+</LinearLayout>

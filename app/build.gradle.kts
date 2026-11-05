@@ -53,6 +53,7 @@ dependencies {
     implementation(libs.androidx.cardview)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("com.google.android.libraries.places:places:5.1.1")
     implementation("com.google.android.gms:play-services-location:21.3.0")
     ksp("androidx.room:room-compiler:2.8.5")

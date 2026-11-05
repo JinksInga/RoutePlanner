@@ -5,6 +5,10 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.routeplanner.app.databinding.ActivityMainBinding
 import android.content.Intent
+import android.view.MotionEvent
+import android.view.View
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.OvershootInterpolator
 import androidx.lifecycle.lifecycleScope
 import com.routeplanner.app.data.database.RouteDatabase
 import com.routeplanner.app.repository.RouteRepository
@@ -22,19 +26,19 @@ class MainActivity : AppCompatActivity()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        configureButtons()
-        /*enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }*/
+        configureCardViews()
+
+        addCardAnimation(binding.cvNewRoute)
+        addCardAnimation(binding.cvContinueRoute)
+        addCardAnimation(binding.cvDestinations)
+        addCardAnimation(binding.cvHistory)
+        addCardAnimation(binding.cvSettings)
+
     }
 
-    private fun configureButtons()
+    private fun configureCardViews()
     {
-        binding.btnNewRoute.setOnClickListener {
+        binding.cvNewRoute.setOnClickListener {
 
             // Limpiar las direcciones seleccionadas de la ruta anterior
             getSharedPreferences("route_preferences",
@@ -50,11 +54,11 @@ class MainActivity : AppCompatActivity()
             startActivity(intent)
         }
 
-        binding.btnContinueRoute.setOnClickListener {
+        binding.cvContinueRoute.setOnClickListener {
             continueRoute()
         }
 
-        binding.btnDestinations.setOnClickListener {
+        binding.cvDestinations.setOnClickListener {
             val intent = android.content.Intent(
                 this,
                 DestinationsActivity::class.java
@@ -62,7 +66,7 @@ class MainActivity : AppCompatActivity()
             startActivity(intent)
         }
 
-        binding.btnHistory.setOnClickListener {
+        binding.cvHistory.setOnClickListener {
             val intent = Intent(
                 this,
                 HistoryActivity::class.java
@@ -70,7 +74,7 @@ class MainActivity : AppCompatActivity()
             startActivity(intent)
         }
 
-        binding.btnSettings.setOnClickListener {
+        binding.cvSettings.setOnClickListener {
             val intent = Intent(this, SettingsActivity::class.java)
             startActivity(intent)
         }
@@ -115,6 +119,36 @@ class MainActivity : AppCompatActivity()
                     Toast.LENGTH_LONG
                 ).show()
             }
+        }
+    }
+
+    private fun addCardAnimation(view: View) {
+
+        view.setOnTouchListener { card, event ->
+
+            when (event.action) {
+
+                MotionEvent.ACTION_DOWN -> {
+                    card.animate()
+                        .scaleX(0.90f)
+                        .scaleY(0.90f)
+                        .setDuration(100)
+                        .setInterpolator(DecelerateInterpolator())
+                        .start()
+                }
+
+                MotionEvent.ACTION_UP,
+                MotionEvent.ACTION_CANCEL -> {
+                    card.animate()
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(250)
+                        .setInterpolator(OvershootInterpolator())
+                        .start()
+                }
+            }
+
+            false
         }
     }
 }
