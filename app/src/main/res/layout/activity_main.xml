@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="#F4F9FF">
+    android:background="@color/rp_background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -20,7 +20,7 @@
             android:text="Route Planner"
             android:textSize="30sp"
             android:textStyle="bold"
-            android:textColor="#103B75"
+            android:textColor="@color/rp_text_primary"
             android:layout_marginTop="4dp"/>
 
         <TextView
@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:text="GESTIÓN INTELIGENTE DE RUTAS"
             android:textSize="12sp"
-            android:textColor="#526985"
+            android:textColor="@color/rp_text_secondary"
             android:letterSpacing="0.06"
             android:layout_marginTop="5dp"/>
 
@@ -38,7 +38,7 @@
             android:text="¿Qué quieres hacer hoy?"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="#103B75"
+            android:textColor="@color/rp_text_primary"
             android:layout_marginTop="24dp"
             android:layout_marginBottom="16dp"/>
 
@@ -50,7 +50,7 @@
             android:clickable="true"
             android:focusable="true"
             android:foreground="?attr/selectableItemBackground"
-            app:cardBackgroundColor="#FFFFFF"
+            app:cardBackgroundColor="@color/rp_surface"
             app:cardCornerRadius="20dp"
             app:cardElevation="3dp"
             app:strokeWidth="0dp">
@@ -74,14 +74,14 @@
                         android:text="Nueva ruta"
                         android:textSize="21sp"
                         android:textStyle="bold"
-                        android:textColor="#103B75"/>
+                        android:textColor="@color/rp_text_primary"/>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Planifica un nuevo recorrido"
                         android:textSize="13sp"
-                        android:textColor="#60758F"
+                        android:textColor="@color/rp_text_secondary"
                         android:layout_marginTop="7dp"/>
 
                     <TextView
@@ -90,7 +90,7 @@
                         android:text="COMENZAR  →"
                         android:textSize="12sp"
                         android:textStyle="bold"
-                        android:textColor="#1565C0"
+                        android:textColor="@color/rp_primary"
                         android:layout_marginTop="13dp"/>
 
                 </LinearLayout>
@@ -99,7 +99,7 @@
                     android:layout_width="76dp"
                     android:layout_height="76dp"
                     android:src="@drawable/ic_add_route"
-                    android:background="#EAF2FF"
+                    android:background="@color/rp_icon_background"
                     android:padding="12dp"
                     android:contentDescription="Nueva ruta"/>
 
@@ -124,7 +124,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/rp_surface"
                 app:cardCornerRadius="18dp"
                 app:cardElevation="3dp"
                 app:strokeWidth="0dp">
@@ -147,7 +147,7 @@
                         android:text="Continuar ruta"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:textColor="#103B75"
+                        android:textColor="@color/rp_text_primary"
                         android:layout_marginTop="9dp"/>
 
                     <TextView
@@ -155,7 +155,7 @@
                         android:layout_height="wrap_content"
                         android:text="Retoma tu recorrido"
                         android:textSize="12sp"
-                        android:textColor="#60758F"
+                        android:textColor="@color/rp_text_secondary"
                         android:layout_marginTop="5dp"/>
 
                 </LinearLayout>
@@ -172,7 +172,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/rp_surface"
                 app:cardCornerRadius="18dp"
                 app:cardElevation="3dp"
                 app:strokeWidth="0dp">
@@ -195,7 +195,7 @@
                         android:text="Mis direcciones"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:textColor="#103B75"
+                        android:textColor="@color/rp_text_primary"
                         android:layout_marginTop="9dp"/>
 
                     <TextView
@@ -203,7 +203,7 @@
                         android:layout_height="wrap_content"
                         android:text="Gestiona tus destinos"
                         android:textSize="12sp"
-                        android:textColor="#60758F"
+                        android:textColor="@color/rp_text_secondary"
                         android:layout_marginTop="5dp"/>
 
                 </LinearLayout>
@@ -229,7 +229,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/rp_surface"
                 app:cardCornerRadius="18dp"
                 app:cardElevation="3dp"
                 app:strokeWidth="0dp">
@@ -252,7 +252,7 @@
                         android:text="Historial"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:textColor="#103B75"
+                        android:textColor="@color/rp_text_primary"
                         android:layout_marginTop="9dp"/>
 
                     <TextView
@@ -260,7 +260,7 @@
                         android:layout_height="wrap_content"
                         android:text="Consulta tus recorridos"
                         android:textSize="12sp"
-                        android:textColor="#60758F"
+                        android:textColor="@color/rp_text_secondary"
                         android:layout_marginTop="5dp"/>
 
                 </LinearLayout>
@@ -277,7 +277,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
-                app:cardBackgroundColor="#FFFFFF"
+                app:cardBackgroundColor="@color/rp_surface"
                 app:cardCornerRadius="18dp"
                 app:cardElevation="3dp"
                 app:strokeWidth="0dp">
@@ -300,7 +300,7 @@
                         android:text="Configuración"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:textColor="#103B75"
+                        android:textColor="@color/rp_text_primary"
                         android:layout_marginTop="9dp"/>
 
                     <TextView
@@ -308,7 +308,7 @@
                         android:layout_height="wrap_content"
                         android:text="Personaliza la aplicación"
                         android:textSize="12sp"
-                        android:textColor="#60758F"
+                        android:textColor="@color/rp_text_secondary"
                         android:layout_marginTop="5dp"/>
 
                 </LinearLayout>

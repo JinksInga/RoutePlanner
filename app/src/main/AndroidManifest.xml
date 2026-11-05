@@ -14,16 +14,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.RoutePlanner">
-        <!-- activity
-            android:name=".activities.MainActivity"
-            android:exported="true"
-            android:windowSoftInputMode="adjustResize">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity -->
         <!-- Pantalla de presentación -->
         <activity
             android:name=".activities.SplashActivity"
@@ -43,30 +34,43 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        <activity
-            android:name=".activities.DestinationsActivity"
-            android:exported="false" />
+        <!-- Nueva ruta -->
         <activity
             android:name=".activities.NewRouteActivity"
             android:exported="false" />
         <activity
+            android:name=".activities.SelectDestinationsActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.RouteResultActivity"
             android:exported="false" />
-        <activity
-            android:name=".activities.HistoryActivity"
-            android:exported="false" />
-        <activity
-            android:name=".activities.HistoryRouteActivity"
-            android:exported="false" />
-        <activity
-            android:name=".activities.SettingsActivity"
-            android:exported="false" />
+
+        <!-- Continuar ruta -->
         <activity
             android:name=".activities.SelectRouteActivity"
             android:exported="false" />
         <activity
             android:name=".activities.EditRouteActivity"
             android:exported="false" />
+
+        <!-- Mis direcciones -->
+        <activity
+            android:name=".activities.DestinationsActivity"
+            android:exported="false" />
+
+        <!-- Historial -->
+        <activity
+            android:name=".activities.HistoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.HistoryRouteActivity"
+            android:exported="false" />
+
+        <!-- Configuración -->
+        <activity
+            android:name=".activities.SettingsActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

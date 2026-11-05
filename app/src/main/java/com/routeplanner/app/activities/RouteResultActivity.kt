@@ -18,6 +18,7 @@ import android.content.Intent
 import android.net.Uri
 import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.OnBackPressedCallback
 import androidx.recyclerview.widget.ConcatAdapter
 import com.routeplanner.app.R
 import com.routeplanner.app.adapters.RouteHeaderAdapter
@@ -53,8 +54,18 @@ class RouteResultActivity : AppCompatActivity() {
 
         // Acción de la flecha
         binding.toolbar.setNavigationOnClickListener {
-            finish()
+            returnToMainActivity()
         }
+
+        // Acción del botón atrás de Android
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    returnToMainActivity()
+                }
+            }
+        )
 
         val database = RouteDatabase.getDatabase(applicationContext)
 
@@ -67,21 +78,6 @@ class RouteResultActivity : AppCompatActivity() {
             routeStopDao = database.routeStopDao(),
             database = database
         )
-
-        /*binding.btnEditRoute.setOnClickListener {
-            val routeId = intent.getIntExtra(EXTRA_ROUTE_ID, -1)
-
-            if (routeId != -1) {
-                val editIntent = Intent(
-                    this,
-                    EditRouteActivity::class.java
-                )
-
-                editIntent.putExtra(EXTRA_ROUTE_ID, routeId)
-                startActivity(editIntent)
-            }
-        }*/
-
 
         configureRecyclerView()
         loadRoute()
@@ -505,4 +501,15 @@ class RouteResultActivity : AppCompatActivity() {
                 }
         }
     }
+
+    private fun returnToMainActivity() {
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+
+        startActivity(intent)
+        finish()
+    }
+
 }

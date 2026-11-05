@@ -1,58 +1,52 @@
 package com.routeplanner.app.activities
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
-import com.routeplanner.app.BuildConfig
-import com.google.android.libraries.places.api.Places
-import com.google.android.libraries.places.api.model.Place
-import com.google.android.libraries.places.api.net.FetchPlaceRequest
-import com.google.android.libraries.places.api.net.PlacesClient
-import com.google.android.libraries.places.widget.PlaceAutocomplete
-import android.Manifest
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.os.Bundle
-import android.view.View
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
-import com.routeplanner.app.adapters.RouteDestinationAdapter
-import com.routeplanner.app.data.database.RouteDatabase
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.net.FetchPlaceRequest
+import com.google.android.libraries.places.api.net.PlacesClient
+import com.google.android.libraries.places.widget.PlaceAutocomplete
+import com.routeplanner.app.BuildConfig
 import com.routeplanner.app.databinding.ActivityNewRouteBinding
-import com.routeplanner.app.repository.DestinationRepository
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
-import com.routeplanner.app.RouteOptimizer
-import kotlinx.coroutines.flow.first
-import kotlin.jvm.java
-import com.routeplanner.app.data.database.entity.RouteEntity
-import com.routeplanner.app.data.database.entity.RouteStopEntity
-import com.routeplanner.app.repository.RouteRepository
-import android.location.Geocoder
-import java.util.Locale
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Locale
 
-class NewRouteActivity : AppCompatActivity() {
+class NewRouteActivity : AppCompatActivity()
+{
+    companion object
+    {
+        const val EXTRA_ROUTE_NAME = "routeName"
+        const val EXTRA_ORIGIN_LATITUDE = "originLatitude"
+        const val EXTRA_ORIGIN_LONGITUDE = "originLongitude"
+        const val EXTRA_ORIGIN_ADDRESS = "originAddress"
+        const val EXTRA_OPTIMIZATION_TYPE = "optimizationType"
+    }
 
     private lateinit var binding: ActivityNewRouteBinding
-    private lateinit var adapter: RouteDestinationAdapter
-    private lateinit var repository: DestinationRepository
-    private lateinit var routeRepository: RouteRepository
     private lateinit var fusedLocationClient:
             com.google.android.gms.location.FusedLocationProviderClient
     private lateinit var placesClient: PlacesClient
 
     private val AUTOCOMPLETE_ORIGIN_REQUEST_CODE = 1002
     private var cancellationTokenSource: CancellationTokenSource? = null
-    private var selectedCount = 0
 
-    // Coordenadas del punto de partida
+    // Coordenadas del punto de partida.
     private var selectedOriginLatitude: Double? = null
     private var selectedOriginLongitude: Double? = null
     private var selectedOriginAddress: String? = null
@@ -61,7 +55,11 @@ class NewRouteActivity : AppCompatActivity() {
         getSharedPreferences("route_preferences", MODE_PRIVATE)
     }
 
-    // Solicitud de permisos de ubicación
+    private val optimizationOptions = listOf(
+        "Vecino más cercano",
+        "Optimización global (Google Routes)"
+    )
+
     private val locationPermissionLauncher =
         registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
@@ -102,72 +100,58 @@ class NewRouteActivity : AppCompatActivity() {
         fusedLocationClient =
             LocationServices.getFusedLocationProviderClient(this)
 
-        configureRepository()
-        configureRecyclerView()
-        observeDestinations()
+        configureToolbar()
+        configureOptimizationDropdown()
+        loadOptimizationPreference()
         configureButtons()
 
-        loadOptimizationPreference()
         checkLocationPermission()
     }
 
-    //Así tendremos acceso tanto a las direcciones como a las rutas y sus paradas.
-    private fun configureRepository() {
-
-        val database = RouteDatabase.getDatabase(applicationContext)
-
-        repository = DestinationRepository(
-            database.destinationDao()
-        )
-
-        routeRepository = RouteRepository(
-            routeDao = database.routeDao(),
-            routeStopDao = database.routeStopDao(),
-            database = database
-        )
-    }
-
-    private fun configureRecyclerView() {
-        adapter = RouteDestinationAdapter { selectedDestinations ->
-
-            selectedCount = selectedDestinations.size
-
-            saveSelectedDestinations(
-                selectedDestinations.map { it.id }.toSet()
-            )
-
-            binding.tvDestinationCount.text =
-                if (selectedCount == 1) {
-                    "1 destino seleccionado"
-                } else {
-                    "$selectedCount destinos seleccionados"
-                }
+    private fun configureToolbar() {
+        binding.toolbar.setNavigationOnClickListener {
+            finish()
         }
-
-        binding.rvRouteDestinations.layoutManager =
-            LinearLayoutManager(this)
-
-        binding.rvRouteDestinations.adapter = adapter
     }
 
-    private fun observeDestinations() {
-        lifecycleScope.launch {
-            repository.getAllDestinations().collectLatest { destinations ->
+    private fun configureOptimizationDropdown() {
 
-                val savedSelection = getSelectedDestinations()
+        val adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_dropdown_item_1line,
+            optimizationOptions
+        )
 
-                adapter.updateDestinations(destinations)
-                adapter.restoreSelection(savedSelection)
+        binding.actOptimization.setAdapter(adapter)
 
-                if (destinations.isEmpty()) {
-                    binding.tvNoDestinations.visibility = View.VISIBLE
-                    binding.rvRouteDestinations.visibility = View.GONE
-                } else {
-                    binding.tvNoDestinations.visibility = View.GONE
-                    binding.rvRouteDestinations.visibility = View.VISIBLE
-                }
+        binding.actOptimization.setOnItemClickListener { _, _, position, _ ->
+
+            val optimizationType = if (position == 1) {
+                "GLOBAL"
+            } else {
+                "NEAREST"
             }
+
+            preferences.edit()
+                .putString("optimization_type", optimizationType)
+                .apply()
         }
+    }
+
+    private fun loadOptimizationPreference() {
+
+        val optimizationType = preferences.getString(
+            "optimization_type",
+            "NEAREST"
+        )
+
+        val selectedOption = if (optimizationType == "GLOBAL") {
+            optimizationOptions[1]
+        } else {
+            optimizationOptions[0]
+        }
+
+        binding.actOptimization.setText(selectedOption, false)
     }
 
     private fun configureButtons() {
@@ -180,31 +164,32 @@ class NewRouteActivity : AppCompatActivity() {
             launchOriginAutocomplete()
         }
 
-        binding.btnCalculateRoute.setOnClickListener {
-            calculateRoute()
+        binding.btnSelectDestinations.setOnClickListener {
+            continueToDestinations()
         }
     }
 
-    private fun loadOptimizationPreference() {
+    private fun continueToDestinations() {
 
-        val optimizationType = preferences.getString(
-            "optimization_type",
-            "NEAREST"
-        )
+        // Validar el nombre de la ruta.
+        val routeName = binding.etRouteName.text
+            ?.toString()
+            ?.trim()
+            .orEmpty()
 
-        when (optimizationType) {
-            "GLOBAL" -> binding.rbGlobal.isChecked = true
-            else -> binding.rbNearest.isChecked = true
+        if (routeName.isBlank()) {
+            binding.tilRouteName.error = "Introduce un nombre para la ruta."
+            binding.etRouteName.requestFocus()
+            return
         }
-    }
 
-    private fun calculateRoute() {
+        binding.tilRouteName.error = null
 
+        // Validar el punto de partida.
         val originLatitude = selectedOriginLatitude
         val originLongitude = selectedOriginLongitude
         val originAddress = selectedOriginAddress
 
-        // Comprobar el origen.
         if (originLatitude == null ||
             originLongitude == null ||
             originAddress == null
@@ -217,166 +202,31 @@ class NewRouteActivity : AppCompatActivity() {
             return
         }
 
-        // Comprobar los destinos seleccionados.
-        val selectedIds = getSelectedDestinations()
+        // Recuperar el method de optimización.
+        val optimizationType = preferences.getString(
+            "optimization_type",
+            "NEAREST"
+        ) ?: "NEAREST"
 
-        if (selectedIds.isEmpty()) {
-            Toast.makeText(
-                this,
-                "Selecciona al menos un destino.",
-                Toast.LENGTH_LONG
-            ).show()
-            return
+        // Guardar el nombre de la ruta.
+        preferences.edit()
+            .putString("route_name", routeName)
+            .apply()
+
+        // Abrir la pantalla de selección de destinos.
+        val intent = Intent(
+            this,
+            SelectDestinationsActivity::class.java
+        ).apply {
+
+            putExtra(EXTRA_ROUTE_NAME, routeName)
+            putExtra(EXTRA_ORIGIN_LATITUDE, originLatitude)
+            putExtra(EXTRA_ORIGIN_LONGITUDE, originLongitude)
+            putExtra(EXTRA_ORIGIN_ADDRESS, originAddress)
+            putExtra(EXTRA_OPTIMIZATION_TYPE, optimizationType)
         }
 
-        // Recuperar el method de optimización guardado.
-        val optimizationType = getSharedPreferences(
-            "route_preferences",
-            MODE_PRIVATE
-        ).getString("optimization_type", "NEAREST")
-
-        // Comprobar si Google Routes API está seleccionado.
-        if (optimizationType == "GLOBAL") {
-            Toast.makeText(
-                this,
-                "La optimización global todavía no está disponible.",
-                Toast.LENGTH_LONG
-            ).show()
-            return
-        }
-
-        lifecycleScope.launch {
-
-            try {
-                // Recuperar los destinos guardados.
-                val allDestinations =
-                    repository.getAllDestinations().first()
-
-                val selectedDestinations =
-                    allDestinations.filter {
-                        selectedIds.contains(it.id)
-                    }
-
-                if (selectedDestinations.isEmpty()) {
-                    Toast.makeText(
-                        this@NewRouteActivity,
-                        "No se han encontrado los destinos seleccionados.",
-                        Toast.LENGTH_LONG
-                    ).show()
-                    return@launch
-                }
-
-                // Comprobar coordenadas.
-                val missingCoordinates =
-                    selectedDestinations.any {
-                        it.latitude == null || it.longitude == null
-                    }
-
-                if (missingCoordinates) {
-                    Toast.makeText(
-                        this@NewRouteActivity,
-                        "Hay destinos sin coordenadas. Revisa sus direcciones.",
-                        Toast.LENGTH_LONG
-                    ).show()
-                    return@launch
-                }
-
-                // Calcular el recorrido optimizado.
-                val optimizedRoute =
-                    RouteOptimizer.optimizeNearestNeighbor(
-                        originLatitude,
-                        originLongitude,
-                        selectedDestinations
-                    )
-
-                if (optimizedRoute.size != selectedDestinations.size) {
-                    Toast.makeText(
-                        this@NewRouteActivity,
-                        "No se han podido ordenar todos los destinos.",
-                        Toast.LENGTH_LONG
-                    ).show()
-                    return@launch
-                }
-
-                // Generar nombre para la ruta.
-                val routeName = binding.etRouteName.text
-                    .toString()
-                    .trim()
-
-                if (routeName.isBlank()) {
-                    Toast.makeText(
-                        this@NewRouteActivity,
-                        "Introduce un nombre para la ruta.",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return@launch
-                }
-
-                // Crear la entidad de ruta.
-                val route = RouteEntity(
-                    name = routeName,
-                    originAddress =  selectedOriginAddress ?: "Ubicación actual",//originAddress,
-                    originLatitude = originLatitude,
-                    originLongitude = originLongitude,
-                    optimizationType = "NEAREST"
-                )
-
-                // Crear las paradas respetando el orden calculado.
-                val stops = optimizedRoute.mapIndexed { index, destination ->
-
-                    RouteStopEntity(
-                        routeId = 0,
-                        destinationId = destination.id,
-                        addressSnapshot = destination.address,
-                        latitude = destination.latitude!!,
-                        longitude = destination.longitude!!,
-                        stopOrder = index + 1
-                    )
-                }
-
-                // Guardar la ruta y todas sus paradas.
-                val routeId = routeRepository.createRouteWithStops(
-                    route = route,
-                    stops = stops
-                )
-
-                Toast.makeText(
-                    this@NewRouteActivity,
-                    "Ruta guardada correctamente.",
-                    Toast.LENGTH_SHORT
-                ).show()
-
-                // Abrir la pantalla de resultados.
-                val intent = Intent(
-                    this@NewRouteActivity,
-                    RouteResultActivity::class.java
-                )
-
-                // Conservamos temporalmente los IDs para que la pantalla
-                // de resultados actual siga funcionando.
-                intent.putExtra(
-                    RouteResultActivity.EXTRA_DESTINATION_IDS,
-                    optimizedRoute.map { it.id }.toIntArray()
-                )
-
-                // También enviamos el identificador de la nueva ruta.
-                intent.putExtra(
-                    RouteResultActivity.EXTRA_ROUTE_ID,
-                    routeId.toInt()
-                )
-
-                startActivity(intent)
-                finish()
-
-            } catch (e: Exception) {
-
-                Toast.makeText(
-                    this@NewRouteActivity,
-                    "Error al guardar la ruta: ${e.localizedMessage}",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-        }
+        startActivity(intent)
     }
 
     private fun launchOriginAutocomplete() {
@@ -424,7 +274,6 @@ class NewRouteActivity : AppCompatActivity() {
         }
     }
 
-
     private fun getCurrentLocation() {
 
         cancellationTokenSource?.cancel()
@@ -463,7 +312,7 @@ class NewRouteActivity : AppCompatActivity() {
                                     1
                                 )?.firstOrNull()?.getAddressLine(0)
 
-                            } catch (e: Exception) {
+                            } catch (_: Exception) {
                                 null
                             }
                         }
@@ -471,8 +320,7 @@ class NewRouteActivity : AppCompatActivity() {
                         selectedOriginAddress = address
                             ?: "Ubicación GPS (dirección no disponible)"
 
-                        binding.tvSelectedOrigin.text =
-                            "Punto de partida:\n$selectedOriginAddress"
+                        binding.tvSelectedOrigin.text = selectedOriginAddress
 
                         Toast.makeText(
                             this@NewRouteActivity,
@@ -497,29 +345,13 @@ class NewRouteActivity : AppCompatActivity() {
                 ).show()
             }
 
-        } catch (e: SecurityException) {
+        } catch (_: SecurityException) {
             Toast.makeText(
                 this,
                 "No tenemos permiso para acceder a la ubicación.",
                 Toast.LENGTH_LONG
             ).show()
         }
-    }
-
-    private fun saveSelectedDestinations(ids: Set<Int>) {
-        preferences.edit()
-            .putStringSet(
-                "selected_destination_ids",
-                ids.map { it.toString() }.toSet()
-            )
-            .apply()
-    }
-
-    private fun getSelectedDestinations(): Set<Int> {
-        return preferences.getStringSet(
-            "selected_destination_ids",
-            emptySet()
-        )?.mapNotNull { it.toIntOrNull() }?.toSet() ?: emptySet()
     }
 
     @Suppress("DEPRECATION")
@@ -585,13 +417,9 @@ class NewRouteActivity : AppCompatActivity() {
 
                 selectedOriginLatitude = location.latitude
                 selectedOriginLongitude = location.longitude
-
                 selectedOriginAddress = address
 
-                binding.tvSelectedOrigin.text =
-                    "$address\n" +
-                            "Latitud: ${location.latitude}\n" +
-                            "Longitud: ${location.longitude}"
+                binding.tvSelectedOrigin.text = address
 
                 Toast.makeText(
                     this,
@@ -613,4 +441,5 @@ class NewRouteActivity : AppCompatActivity() {
         cancellationTokenSource?.cancel()
         super.onDestroy()
     }
+
 }

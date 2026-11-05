@@ -1,149 +1,226 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="#F5F7FA"
-    android:nestedScrollingEnabled="true">
+    android:orientation="vertical"
+    android:background="@color/rp_background">
 
+    <!-- BARRA SUPERIOR -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/rp_surface"
+        app:title="Nueva ruta"
+        app:titleTextColor="@color/rp_text_primary"
+        app:navigationIcon="@drawable/ic_arrow_back_24"
+        app:navigationIconTint="@color/rp_text_primary"
+        app:elevation="2dp" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- INTRODUCCIÓN -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Vamos a preparar tu ruta"
+                android:textColor="@color/rp_text_primary"
+                android:textSize="23sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="24dp"
+                android:text="Configura los datos iniciales antes de seleccionar tus destinos."
+                android:textColor="@color/rp_text_secondary"
+                android:textSize="14sp" />
+
+            <!-- NOMBRE DE LA RUTA -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilRouteName"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Nombre de la ruta"
+                app:boxStrokeColor="@color/rp_primary"
+                app:hintTextColor="@color/rp_primary">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etRouteName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapSentences"
+                    android:maxLines="1"
+                    android:imeOptions="actionNext" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- PUNTO DE PARTIDA -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:layout_marginBottom="10dp"
+                android:text="PUNTO DE PARTIDA"
+                android:textColor="@color/rp_text_primary"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <!-- DIRECCIÓN SELECCIONADA -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="@color/rp_surface"
+                app:cardCornerRadius="12dp"
+                app:strokeColor="@color/rp_outline"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="14dp">
+
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:src="@drawable/ic_launcher_foreground"
+                        android:contentDescription="Punto de partida"
+                        app:tint="@color/rp_primary" />
+
+                    <TextView
+                        android:id="@+id/tvSelectedOrigin"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="12dp"
+                        android:text="Todavía no has seleccionado un punto de partida"
+                        android:textColor="@color/rp_text_secondary"
+                        android:textSize="14sp" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- OPCIONES DE ORIGEN -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:orientation="horizontal"
+                android:weightSum="2">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCurrentLocation"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    android:minHeight="52dp"
+                    android:text="Mi ubicación"
+                    android:textSize="12sp"
+                    app:icon="@drawable/ic_launcher_foreground"
+                    app:iconGravity="textStart"
+                    app:iconSize="18dp"
+                    app:cornerRadius="10dp"
+                    app:backgroundTint="@color/rp_icon_background"
+                    android:textColor="@color/rp_text_primary" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnManualOrigin"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    android:minHeight="52dp"
+                    android:text="Dirección manual"
+                    android:textSize="12sp"
+                    app:icon="@drawable/ic_launcher_foreground"
+                    app:iconGravity="textStart"
+                    app:iconSize="18dp"
+                    app:cornerRadius="10dp"
+                    app:backgroundTint="@color/rp_icon_background"
+                    android:textColor="@color/rp_text_primary" />
+
+            </LinearLayout>
+
+            <!-- MÉTODO DE OPTIMIZACIÓN -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="10dp"
+                android:text="MÉTODO DE OPTIMIZACIÓN"
+                android:textColor="@color/rp_text_primary"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilOptimization"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:boxStrokeColor="@color/rp_primary">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/actOptimization"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:text="Vecino más cercano"
+                    android:textColor="@color/rp_text_primary"
+                    android:importantForAutofill="no" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="El método elegido determinará el orden de visita de los destinos."
+                android:textColor="@color/rp_text_secondary"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <!-- ACCIÓN INFERIOR -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:padding="16dp"
+        android:background="@color/rp_surface"
+        android:elevation="6dp">
 
-        <TextView
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSelectDestinations"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Nueva ruta"
-            android:textSize="26sp"
-            android:textStyle="bold"
-            android:textColor="#183153"
-            android:layout_marginBottom="20dp"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="PUNTO DE PARTIDA"
-            android:textStyle="bold"
-            android:textColor="#183153"
-            android:layout_marginBottom="8dp"/>
-
-
-        <Button
-            android:id="@+id/btnCurrentLocation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Usar mi ubicación actual"
-            android:drawableStart="@android:drawable/ic_menu_mylocation"
-            android:layout_marginBottom="10dp" />
-
-        <Button
-            android:id="@+id/btnManualOrigin"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Introducir dirección manualmente"
-            android:drawableStart="@android:drawable/ic_menu_search" />
-
-        <TextView
-            android:id="@+id/tvSelectedOrigin"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Todavía no has seleccionado un punto de partida"
-            android:textColor="#607080"
-            android:padding="12dp"
-            android:layout_marginTop="8dp" />
-
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Nombre de la ruta"
-            android:textColor="#183153"
+            android:layout_height="58dp"
+            android:text="Seleccionar destinos"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="6dp" />
-
-        <EditText
-            android:id="@+id/etRouteName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Ej. Ruta Mañanas Móstoles"
-            android:inputType="textCapSentences"
-            android:maxLines="1"
-            android:padding="12dp"
-            android:background="@android:drawable/edit_text" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="DESTINOS"
-            android:textStyle="bold"
-            android:textColor="#183153"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="8dp"/>
-
-        <TextView
-            android:id="@+id/tvDestinationCount"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Selecciona las direcciones que deseas visitar"
-            android:textColor="#607080"
-            android:layout_marginBottom="8dp"/>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvRouteDestinations"
-            android:layout_width="match_parent"
-            android:layout_height="250dp"
-            android:nestedScrollingEnabled="true"
-            android:overScrollMode="always"/>
-
-        <TextView
-            android:id="@+id/tvNoDestinations"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Todavía no tienes direcciones guardadas."
-            android:textColor="#607080"
-            android:padding="16dp"
-            android:textAlignment="center"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="MÉTODO DE ORDENACIÓN"
-            android:textStyle="bold"
-            android:textColor="#183153"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="8dp"/>
-
-        <RadioGroup
-            android:id="@+id/rgOptimization"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <RadioButton
-                android:id="@+id/rbNearest"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Vecino más cercano"
-                android:checked="true"/>
-
-            <RadioButton
-                android:id="@+id/rbGlobal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Optimización global (Google Routes)"/>
-
-        </RadioGroup>
-
-        <Button
-            android:id="@+id/btnCalculateRoute"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:text="Calcular ruta"
-            android:layout_marginTop="24dp"/>
+            app:icon="@drawable/ic_launcher_foreground"
+            app:iconGravity="end"
+            app:cornerRadius="14dp"
+            app:backgroundTint="@color/rp_primary"
+            android:textColor="@color/rp_surface" />
 
     </LinearLayout>
-</ScrollView>
+
+</LinearLayout>

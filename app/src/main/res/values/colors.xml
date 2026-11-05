@@ -141,4 +141,29 @@
     <color name="md_theme_surfaceContainer_highContrast">#E2E2E9</color>
     <color name="md_theme_surfaceContainerHigh_highContrast">#D3D4DB</color>
     <color name="md_theme_surfaceContainerHighest_highContrast">#C5C6CD</color>
+
+
+    <!-- ROUTE PLANNER: IDENTIDAD VISUAL -->
+
+    <!-- Colores principales -->
+    <color name="rp_primary">#1565C0</color>
+    <color name="rp_primary_dark">#103B75</color>
+    <color name="rp_primary_light">#64B5F6</color>
+
+    <!-- Fondos y tarjetas -->
+    <color name="rp_background">#F4F9FF</color>
+    <color name="rp_surface">#FFFFFF</color>
+    <color name="rp_icon_background">#EAF2FF</color>
+
+    <!-- Textos -->
+    <color name="rp_text_primary">#103B75</color>
+    <color name="rp_text_secondary">#526985</color>
+
+    <!-- Estados y acentos -->
+    <color name="rp_success">#43A047</color>
+    <color name="rp_destination">#EF4444</color>
+
+    <!-- Bordes y separadores -->
+    <color name="rp_outline">#B8CBE3</color>
+
 </resources>

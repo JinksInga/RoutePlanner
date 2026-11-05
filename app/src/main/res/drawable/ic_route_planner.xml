@@ -6,43 +6,43 @@
 
     <!-- Mapa -->
     <path
-        android:fillColor="#2196F3"
+        android:fillColor="@color/rp_primary"
         android:pathData="M20,65 L75,40 L130,60 L180,35 L180,145 L125,170 L70,150 L20,175 Z"/>
 
     <!-- Pliegues del mapa -->
     <path
-        android:fillColor="#43A047"
+        android:fillColor="@color/rp_success"
         android:pathData="M75,40 L75,150 L125,170 L130,60 Z"/>
 
     <path
-        android:fillColor="#64B5F6"
+        android:fillColor="@color/rp_primary_light"
         android:pathData="M20,65 L75,40 L75,150 L20,175 Z"/>
 
     <!-- Ruta -->
     <path
         android:fillColor="@android:color/transparent"
         android:pathData="M35,125 Q70,85 100,120 T165,70"
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="@color/rp_surface"
         android:strokeWidth="7"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"/>
 
     <!-- Punto de partida -->
     <path
-        android:fillColor="#1565C0"
+        android:fillColor="@color/rp_primary"
         android:pathData="M35,70 C20,70 12,82 12,95 C12,112 35,135 35,135 C35,135 58,112 58,95 C58,82 50,70 35,70 Z"/>
 
     <path
-        android:fillColor="#FFFFFF"
+        android:fillColor="@color/rp_surface"
         android:pathData="M35,85 A10,10 0,1 0,35.1 85 Z"/>
 
     <!-- Destino -->
     <path
-        android:fillColor="#EF4444"
+        android:fillColor="@color/rp_destination"
         android:pathData="M165,15 C150,15 140,27 140,42 C140,59 165,82 165,82 C165,82 190,59 190,42 C190,27 180,15 165,15 Z"/>
 
     <path
-        android:fillColor="#FFFFFF"
+        android:fillColor="@color/rp_surface"
         android:pathData="M165,29 A11,11 0,1 0,165.1 29 Z"/>
 
 </vector>
