@@ -22,6 +22,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.recyclerview.widget.ConcatAdapter
 import com.routeplanner.app.R
 import com.routeplanner.app.adapters.RouteHeaderAdapter
+import com.routeplanner.app.data.database.entity.RouteEntity
 import kotlinx.coroutines.flow.first
 
 class RouteResultActivity : AppCompatActivity() {
@@ -78,6 +79,42 @@ class RouteResultActivity : AppCompatActivity() {
             routeStopDao = database.routeStopDao(),
             database = database
         )
+
+        binding.cardReturnToOrigin.setOnClickListener {
+            navigateToOrigin()
+        }
+
+        binding.tvReturnToOriginStatus.setOnClickListener {
+
+            lifecycleScope.launch {
+                try {
+                    val routeId = intent.getIntExtra(EXTRA_ROUTE_ID, -1)
+                    if (routeId == -1) return@launch
+
+                    val route = routeRepository.getRouteById(routeId)
+                        ?: return@launch
+
+                    val stops = routeRepository.getStopsForRoute(routeId)
+
+                    val allStopsCompleted = stops.isNotEmpty() &&
+                            stops.all { it.isCompleted }
+
+                    if (route.returnToOrigin &&
+                        !route.returnToOriginCompleted &&
+                        allStopsCompleted
+                    ) {
+                        confirmReturnToOrigin()
+                    }
+
+                } catch (e: Exception) {
+                    Toast.makeText(
+                        this@RouteResultActivity,
+                        "Error al consultar la ruta: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
 
         configureRecyclerView()
         loadRoute()
@@ -203,48 +240,82 @@ class RouteResultActivity : AppCompatActivity() {
 
     private fun confirmFinishRoute() {
 
-        androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("Finalizar ruta")
-            .setMessage(
-                "¿Estás seguro de que quieres finalizar esta ruta? " +
-                        "Podrás consultarla posteriormente en el historial."
-            )
-            .setNegativeButton("Cancelar", null)
-            .setPositiveButton("Finalizar") { _, _ ->
+        lifecycleScope.launch {
+            try {
+                val routeId = intent.getIntExtra(EXTRA_ROUTE_ID, -1)
 
-                lifecycleScope.launch {
-                    try {
-                        val routeId = intent.getIntExtra(EXTRA_ROUTE_ID, -1)
-
-                        if (routeId == -1) {
-                            Toast.makeText(
-                                this@RouteResultActivity,
-                                "No se ha encontrado la ruta",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            return@launch
-                        }
-
-                        routeRepository.finishRoute(routeId)
-
-                        Toast.makeText(
-                            this@RouteResultActivity,
-                            "Ruta finalizada correctamente",
-                            Toast.LENGTH_SHORT
-                        ).show()
-
-                        finish()
-
-                    } catch (e: Exception) {
-                        Toast.makeText(
-                            this@RouteResultActivity,
-                            "Error al finalizar la ruta: ${e.message}",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
+                if (routeId == -1) {
+                    Toast.makeText(
+                        this@RouteResultActivity,
+                        "No se ha encontrado la ruta",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@launch
                 }
+
+                val route = routeRepository.getRouteById(routeId)
+
+                if (route == null) {
+                    Toast.makeText(
+                        this@RouteResultActivity,
+                        "No se ha encontrado la ruta",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@launch
+                }
+
+                // Comprobar si todavía está pendiente regresar al origen.
+                if (route.returnToOrigin && !route.returnToOriginCompleted) {
+                    androidx.appcompat.app.AlertDialog.Builder(this@RouteResultActivity)
+                        .setTitle("Regreso pendiente")
+                        .setMessage(
+                            "Antes de finalizar esta ruta debes regresar al punto de partida " +
+                                    "y confirmar que has llegado."
+                        )
+                        .setPositiveButton("Entendido", null)
+                        .show()
+                    return@launch
+                }
+
+                androidx.appcompat.app.AlertDialog.Builder(this@RouteResultActivity)
+                    .setTitle("Finalizar ruta")
+                    .setMessage(
+                        "¿Estás seguro de que quieres finalizar esta ruta? " +
+                                "Podrás consultarla posteriormente en el historial."
+                    )
+                    .setNegativeButton("Cancelar", null)
+                    .setPositiveButton("Finalizar") { _, _ ->
+                        lifecycleScope.launch {
+                            try {
+                                routeRepository.finishRoute(routeId)
+
+                                Toast.makeText(
+                                    this@RouteResultActivity,
+                                    "Ruta finalizada correctamente",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+
+                                returnToMainActivity()//finish()
+
+                            } catch (e: Exception) {
+                                Toast.makeText(
+                                    this@RouteResultActivity,
+                                    "Error al finalizar la ruta: ${e.message}",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }
+                    }
+                    .show()
+
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@RouteResultActivity,
+                    "Error al comprobar la ruta: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
             }
-            .show()
+        }
     }
 
     private fun configureRecyclerView() {
@@ -291,13 +362,8 @@ class RouteResultActivity : AppCompatActivity() {
         binding.rvRouteStops.adapter = concatAdapter
     }
 
+
     private fun navigateToStop(stop: RouteStopEntity) {
-
-        val navigationApp = getSharedPreferences(
-            "route_preferences",
-            MODE_PRIVATE
-        ).getString("navigation_app", "GOOGLE_MAPS")
-
         val latitude = stop.latitude
         val longitude = stop.longitude
 
@@ -310,10 +376,51 @@ class RouteResultActivity : AppCompatActivity() {
             return
         }
 
+        navigateToCoordinates(latitude, longitude)
+    }
+
+    private fun navigateToOrigin() {
+        val routeId = intent.getIntExtra(EXTRA_ROUTE_ID, -1)
+
+        if (routeId == -1) return
+
+        lifecycleScope.launch {
+            try {
+                val route = routeRepository.getRouteById(routeId)
+
+                if (route == null) {
+                    Toast.makeText(
+                        this@RouteResultActivity,
+                        "No se ha encontrado la ruta.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    return@launch
+                }
+
+                navigateToCoordinates(
+                    route.originLatitude,
+                    route.originLongitude
+                )
+
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@RouteResultActivity,
+                    "No se ha podido recuperar el punto de partida.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    private fun navigateToCoordinates(latitude: Double, longitude: Double) {
+        val navigationApp = getSharedPreferences(
+            "route_preferences",
+            MODE_PRIVATE
+        ).getString("navigation_app", "GOOGLE_MAPS")
+
         try {
             if (navigationApp == "WAZE") {
 
-                // Intentar abrir directamente la aplicación Waze
                 val wazeIntent = Intent(
                     Intent.ACTION_VIEW,
                     Uri.parse("waze://?ll=$latitude,$longitude&navigate=yes")
@@ -324,7 +431,6 @@ class RouteResultActivity : AppCompatActivity() {
                 if (wazeIntent.resolveActivity(packageManager) != null) {
                     startActivity(wazeIntent)
                 } else {
-                    // Si Waze no está instalado, abrir su versión web
                     val webIntent = Intent(
                         Intent.ACTION_VIEW,
                         Uri.parse(
@@ -335,7 +441,6 @@ class RouteResultActivity : AppCompatActivity() {
                 }
 
             } else {
-
                 val googleIntent = Intent(
                     Intent.ACTION_VIEW,
                     Uri.parse("google.navigation:q=$latitude,$longitude")
@@ -354,7 +459,6 @@ class RouteResultActivity : AppCompatActivity() {
             ).show()
         }
     }
-
 
     private fun reopenStop(stop: RouteStopEntity) {
 
@@ -421,17 +525,38 @@ class RouteResultActivity : AppCompatActivity() {
 
     private fun showFinishRouteSuggestion() {
 
-        androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("¡Has completado todas las paradas!")
-            .setMessage(
-                "Has terminado todos los destinos de esta ruta. " +
-                        "¿Quieres finalizarla ahora?"
-            )
-            .setNegativeButton("Más tarde", null)
-            .setPositiveButton("Finalizar ruta") { _, _ ->
-                confirmFinishRoute()
+        lifecycleScope.launch {
+            val routeId = intent.getIntExtra(EXTRA_ROUTE_ID, -1)
+            if (routeId == -1) return@launch
+
+            val route = routeRepository.getRouteById(routeId) ?: return@launch
+
+            if (route.returnToOrigin && !route.returnToOriginCompleted) {
+
+                androidx.appcompat.app.AlertDialog.Builder(this@RouteResultActivity)
+                    .setTitle("¡Entregas completadas!")
+                    .setMessage(
+                        "Has completado todos los destinos. " +
+                                "Ahora debes regresar al punto de partida para finalizar la ruta."
+                    )
+                    .setPositiveButton("Entendido", null)
+                    .show()
+
+            } else {
+
+                androidx.appcompat.app.AlertDialog.Builder(this@RouteResultActivity)
+                    .setTitle("¡Has completado todas las paradas!")
+                    .setMessage(
+                        "Has terminado todos los destinos de esta ruta. " +
+                                "¿Quieres finalizarla ahora?"
+                    )
+                    .setNegativeButton("Más tarde", null)
+                    .setPositiveButton("Finalizar ruta") { _, _ ->
+                        confirmFinishRoute()
+                    }
+                    .show()
             }
-            .show()
+        }
     }
 
     private fun loadRoute() {
@@ -464,6 +589,8 @@ class RouteResultActivity : AppCompatActivity() {
             }
 
             binding.toolbar.title = route.name
+            binding.tvRouteOriginAddress.text = route.originAddress
+            updateReturnToOriginCard(route)
             updatePauseResumeMenuItem(route.status)
 
             routeStopRepository
@@ -511,5 +638,89 @@ class RouteResultActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
+
+    private fun confirmReturnToOrigin() {
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Confirmar regreso")
+            .setMessage(
+                "¿Has llegado al punto de partida? " +
+                        "Al confirmar, podrás finalizar la ruta."
+            )
+            .setNegativeButton("Todavía no", null)
+            .setPositiveButton("Sí, he llegado") { _, _ ->
+
+                lifecycleScope.launch {
+                    try {
+                        val routeId = intent.getIntExtra(EXTRA_ROUTE_ID, -1)
+
+                        if (routeId == -1) return@launch
+
+                        val route = routeRepository.getRouteById(routeId)
+                            ?: return@launch
+
+                        routeRepository.update(
+                            route.copy(
+                                returnToOriginCompleted = true,
+                                updatedAt = System.currentTimeMillis()
+                            )
+                        )
+
+                        updateReturnToOriginCard(
+                            route.copy(returnToOriginCompleted = true)
+                        )
+
+                        Toast.makeText(
+                            this@RouteResultActivity,
+                            "Regreso al origen confirmado",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        confirmFinishRoute()
+
+                    } catch (e: Exception) {
+                        Toast.makeText(
+                            this@RouteResultActivity,
+                            "Error al confirmar el regreso: ${e.message}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
+            .show()
+    }
+
+    private fun updateReturnToOriginCard(route: RouteEntity) {
+
+        when {
+            !route.returnToOrigin -> {
+                binding.tvReturnToOriginStatus.text =
+                    "Regresar al punto de partida"
+
+                binding.tvReturnToOriginStatus.setTextColor(
+                    android.graphics.Color.parseColor("#2563EB")
+                )
+            }
+
+            route.returnToOriginCompleted -> {
+                binding.tvReturnToOriginStatus.text =
+                    "✓ Regreso al punto de partida completado"
+
+                binding.tvReturnToOriginStatus.setTextColor(
+                    android.graphics.Color.parseColor("#16A34A")
+                )
+            }
+
+            else -> {
+                binding.tvReturnToOriginStatus.text =
+                    "Regreso al punto de partida pendiente"
+
+                binding.tvReturnToOriginStatus.setTextColor(
+                    android.graphics.Color.parseColor("#D97706")
+                )
+            }
+        }
+    }
+
 
 }

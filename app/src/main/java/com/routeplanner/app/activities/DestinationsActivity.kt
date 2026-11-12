@@ -2,6 +2,7 @@ package com.routeplanner.app.activities
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -27,6 +28,11 @@ import com.google.android.libraries.places.widget.PlaceAutocomplete
 
 class DestinationsActivity : Activity()
 {
+    companion object {
+        const val EXTRA_RETURN_AFTER_ADD = "returnAfterAdd"
+        const val EXTRA_CREATED_DESTINATION_ID = "createdDestinationId"
+    }
+
     private lateinit var binding: ActivityDestinationsBinding
     private lateinit var repository: DestinationRepository
     private lateinit var adapter: DestinationAdapter
@@ -65,6 +71,14 @@ class DestinationsActivity : Activity()
         configureButtons()
         configureSearch()
         observeDestinations()
+
+        if (intent.getBooleanExtra(EXTRA_RETURN_AFTER_ADD, false)) {
+            launchNewDestinationAutocomplete()
+        }
+    }
+
+    private fun launchNewDestinationAutocomplete() {
+        launchAutocomplete(null)
     }
 
     private fun configureRecyclerView() {
@@ -377,7 +391,7 @@ class DestinationsActivity : Activity()
 
             if (destination == null) {
 
-                repository.insert(
+                val newDestinationId = repository.insert(
                     DestinationEntity(
                         address = address,
                         latitude = latitude,
@@ -390,6 +404,18 @@ class DestinationsActivity : Activity()
                     "Dirección guardada correctamente",
                     Toast.LENGTH_SHORT
                 ).show()
+
+                if (intent.getBooleanExtra(EXTRA_RETURN_AFTER_ADD, false)) {
+                    val resultIntent = Intent().apply {
+                        putExtra(
+                            EXTRA_CREATED_DESTINATION_ID,
+                            newDestinationId.toInt()
+                        )
+                    }
+
+                    setResult(RESULT_OK, resultIntent)
+                    finish()
+                }
 
             } else {
 

@@ -31,11 +31,12 @@
         <item name="colorSurfaceVariant">@color/rp_icon_background</item>
         <item name="colorOnSurfaceVariant">@color/rp_text_secondary</item>
         <item name="colorOutline">@color/rp_outline</item>
-
         <item name="colorOutlineVariant">@color/md_theme_outlineVariant</item>
+
         <item name="colorSurfaceInverse">@color/md_theme_inverseSurface</item>
         <item name="colorOnSurfaceInverse">@color/md_theme_inverseOnSurface</item>
         <item name="colorPrimaryInverse">@color/md_theme_inversePrimary</item>
+
         <item name="colorPrimaryFixed">@color/md_theme_primaryFixed</item>
         <item name="colorOnPrimaryFixed">@color/md_theme_onPrimaryFixed</item>
         <item name="colorPrimaryFixedDim">@color/md_theme_primaryFixedDim</item>
@@ -48,6 +49,7 @@
         <item name="colorOnTertiaryFixed">@color/md_theme_onTertiaryFixed</item>
         <item name="colorTertiaryFixedDim">@color/md_theme_tertiaryFixedDim</item>
         <item name="colorOnTertiaryFixedVariant">@color/md_theme_onTertiaryFixedVariant</item>
+
         <item name="colorSurfaceDim">@color/md_theme_surfaceDim</item>
         <item name="colorSurfaceBright">@color/md_theme_surfaceBright</item>
         <item name="colorSurfaceContainerLowest">@color/md_theme_surfaceContainerLowest</item>

@@ -21,7 +21,7 @@ import com.routeplanner.app.data.database.entity.RouteStopEntity
         RouteEntity::class,
         RouteStopEntity::class
     ],
-    version = 2,
+    version = 4,
     exportSchema = false
 )
 abstract class RouteDatabase : RoomDatabase() {
@@ -83,6 +83,27 @@ abstract class RouteDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+
+                db.execSQL("""
+            ALTER TABLE routes
+            ADD COLUMN returnToOrigin INTEGER NOT NULL DEFAULT 0
+        """)
+            }
+        }
+
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+            ALTER TABLE routes
+            ADD COLUMN returnToOriginCompleted INTEGER NOT NULL DEFAULT 0
+            """.trimIndent()
+                )
+            }
+        }
+
         fun getDatabase(context: Context): RouteDatabase {
 
             return INSTANCE ?: synchronized(this) {
@@ -92,7 +113,10 @@ abstract class RouteDatabase : RoomDatabase() {
                     RouteDatabase::class.java,
                     "route_planner_database"
                 )
-                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(
+                        MIGRATION_1_2,
+                        MIGRATION_2_3,
+                        MIGRATION_3_4)
                     .build()
 
                 INSTANCE = instance
@@ -102,18 +126,3 @@ abstract class RouteDatabase : RoomDatabase() {
         }
     }
 }
-/*
-* Aquí estamos utilizando el patrón Singleton para evitar crear varias instancias
-* de la misma base de datos.
-* El archivo SQLite se llamará: route_planner_database
-* Android lo almacenará en el espacio privado de nuestra aplicación.
-* */
-
-/*
-* ¿Qué hemos cambiado?
-- Room ahora reconoce las tres entidades.
-- Hemos añadido routeDao() y routeStopDao().
-- La versión de la base de datos pasa de 1 a 2.
-- Hemos creado la migración MIGRATION_1_2.
-- Las direcciones existentes en destinations no se borran ni se modifican.
-* */

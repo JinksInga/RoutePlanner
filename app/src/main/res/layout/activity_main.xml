@@ -7,316 +7,405 @@
     android:fillViewport="true"
     android:background="@color/rp_background">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
+        android:layout_height="wrap_content">
 
         <!-- CABECERA -->
-        <TextView
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:id="@+id/linearLayoutHead"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Route Planner"
-            android:textSize="30sp"
-            android:textStyle="bold"
-            android:textColor="@color/rp_text_primary"
-            android:layout_marginTop="4dp"/>
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="32dp"
+            android:orientation="vertical"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="GESTIÓN INTELIGENTE DE RUTAS"
-            android:textSize="12sp"
-            android:textColor="@color/rp_text_secondary"
-            android:letterSpacing="0.06"
-            android:layout_marginTop="5dp"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/app_name"
+                android:textColor="@color/rp_text_primary"
+                android:textSize="30sp"
+                android:textStyle="bold" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="¿Qué quieres hacer hoy?"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="@color/rp_text_primary"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="16dp"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:letterSpacing="0.06"
+                android:text="@string/comment_intelligent_route_management"
+                android:textColor="@color/rp_text_secondary"
+                android:textSize="12sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/title_ready_to_drive"
+                android:textColor="@color/rp_text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
         <!-- NUEVA RUTA -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cvNewRoute"
             android:layout_width="match_parent"
-            android:layout_height="145dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
             android:clickable="true"
             android:focusable="true"
             android:foreground="?attr/selectableItemBackground"
+            android:stateListAnimator="@animator/card_press_animator"
             app:cardBackgroundColor="@color/rp_surface"
             app:cardCornerRadius="20dp"
             app:cardElevation="3dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayoutHead"
             app:strokeWidth="0dp">
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:padding="20dp">
+                android:layout_height="match_parent">
 
-                <LinearLayout
+                <TextView
+                    android:id="@+id/tvTitleNewRoute"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="32dp"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/title_new_route"
+                    android:textColor="@color/rp_text_primary"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvCommentNewRoute"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="8dp"
+                    android:text="@string/comment_plan_new_route"
+                    android:textColor="@color/rp_text_secondary"
+                    android:textSize="13sp"
+                    app:layout_constraintEnd_toStartOf="@+id/imageView"
+                    app:layout_constraintStart_toStartOf="@+id/tvTitleNewRoute"
+                    app:layout_constraintTop_toBottomOf="@+id/tvTitleNewRoute" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Nueva ruta"
-                        android:textSize="21sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/rp_text_primary"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Planifica un nuevo recorrido"
-                        android:textSize="13sp"
-                        android:textColor="@color/rp_text_secondary"
-                        android:layout_marginTop="7dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="COMENZAR  →"
-                        android:textSize="12sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/rp_primary"
-                        android:layout_marginTop="13dp"/>
-
-                </LinearLayout>
+                <TextView
+                    android:id="@+id/tvTextNewRoute"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="32dp"
+                    android:drawablePadding="8dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/text_start"
+                    android:textColor="@color/rp_primary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    app:drawableEndCompat="@drawable/ic_arrow_forward_24"
+                    app:drawableTint="@color/rp_primary"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/tvCommentNewRoute"
+                    app:layout_constraintTop_toBottomOf="@+id/tvCommentNewRoute" />
 
                 <ImageView
-                    android:layout_width="76dp"
-                    android:layout_height="76dp"
-                    android:src="@drawable/ic_add_route"
+                    android:id="@+id/imageView"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:layout_marginEnd="32dp"
                     android:background="@color/rp_icon_background"
-                    android:padding="12dp"
-                    android:contentDescription="Nueva ruta"/>
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_add_route"
+                    app:layout_constraintBottom_toBottomOf="@+id/tvTextNewRoute"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/tvTitleNewRoute" />
 
-            </LinearLayout>
-
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- SEGUNDA FILA -->
-        <LinearLayout
-            android:layout_width="match_parent"
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="16dp">
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.5" />
 
-            <!-- CONTINUAR RUTA -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cvContinueRoute"
-                android:layout_width="0dp"
-                android:layout_height="175dp"
-                android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                app:cardBackgroundColor="@color/rp_surface"
-                app:cardCornerRadius="18dp"
-                app:cardElevation="3dp"
-                app:strokeWidth="0dp">
+        <!-- CONTINUAR RUTA -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cvContinueRoute"
+            android:layout_width="0dp"
+            android:layout_height="168dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:stateListAnimator="@animator/card_press_animator"
+            app:cardBackgroundColor="@color/rp_surface"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="3dp"
+            app:layout_constraintEnd_toStartOf="@+id/guideline"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cvNewRoute"
+            app:strokeWidth="0dp">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-                    <ImageView
-                        android:layout_width="42dp"
-                        android:layout_height="42dp"
-                        android:src="@drawable/ic_continue_route"
-                        android:contentDescription="Continuar ruta"/>
+                <ImageView
+                    android:id="@+id/ivContinueRoute"
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_continue_route"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Continuar ruta"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/rp_text_primary"
-                        android:layout_marginTop="9dp"/>
+                <TextView
+                    android:id="@+id/tvTitleContinueRoute"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:text="@string/title_continue_route"
+                    android:textColor="@color/rp_text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/ivContinueRoute"
+                    app:layout_constraintTop_toBottomOf="@+id/ivContinueRoute" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Retoma tu recorrido"
-                        android:textSize="12sp"
-                        android:textColor="@color/rp_text_secondary"
-                        android:layout_marginTop="5dp"/>
+                <TextView
+                    android:id="@+id/tvCommentContinueRoute"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="16dp"
+                    android:text="@string/comment_resume_your_journey"
+                    android:textColor="@color/rp_text_secondary"
+                    android:textSize="12sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/tvTitleContinueRoute"
+                    app:layout_constraintTop_toBottomOf="@+id/tvTitleContinueRoute" />
 
-                </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-            </com.google.android.material.card.MaterialCardView>
 
-            <!-- DIRECCIONES -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cvDestinations"
-                android:layout_width="0dp"
-                android:layout_height="175dp"
-                android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                app:cardBackgroundColor="@color/rp_surface"
-                app:cardCornerRadius="18dp"
-                app:cardElevation="3dp"
-                app:strokeWidth="0dp">
+        <!-- MIS DIRECCIONES -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cvDestinations"
+            android:layout_width="0dp"
+            android:layout_height="168dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:stateListAnimator="@animator/card_press_animator"
+            app:cardBackgroundColor="@color/rp_surface"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="3dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guideline"
+            app:layout_constraintTop_toBottomOf="@+id/cvNewRoute"
+            app:strokeWidth="0dp">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-                    <ImageView
-                        android:layout_width="42dp"
-                        android:layout_height="42dp"
-                        android:src="@drawable/ic_destinations"
-                        android:contentDescription="Mis direcciones"/>
+                <ImageView
+                    android:id="@+id/ivDestinations"
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_destinations"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Mis direcciones"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/rp_text_primary"
-                        android:layout_marginTop="9dp"/>
+                <TextView
+                    android:id="@+id/tvTitleDestinations"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:text="@string/title_my_addresses"
+                    android:textColor="@color/rp_text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/ivDestinations"
+                    app:layout_constraintTop_toBottomOf="@+id/ivDestinations" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Gestiona tus destinos"
-                        android:textSize="12sp"
-                        android:textColor="@color/rp_text_secondary"
-                        android:layout_marginTop="5dp"/>
+                <TextView
+                    android:id="@+id/tvCommentDestinations"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="16dp"
+                    android:text="@string/comment_manage_your_destinations"
+                    android:textColor="@color/rp_text_secondary"
+                    android:textSize="12sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/tvTitleDestinations"
+                    app:layout_constraintTop_toBottomOf="@+id/tvTitleDestinations" />
 
-                </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-            </com.google.android.material.card.MaterialCardView>
+        <!-- HISTORIAL DE RUTAS -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cvRouteHistory"
+            android:layout_width="0dp"
+            android:layout_height="168dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="32dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:stateListAnimator="@animator/card_press_animator"
+            app:cardBackgroundColor="@color/rp_surface"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="3dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/guideline"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cvContinueRoute"
+            app:layout_constraintVertical_bias="0.0"
+            app:strokeWidth="0dp">
 
-        </LinearLayout>
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-        <!-- TERCERA FILA -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="16dp">
+                <ImageView
+                    android:id="@+id/ivRouteHistory"
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_history"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- HISTORIAL -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cvHistory"
-                android:layout_width="0dp"
-                android:layout_height="175dp"
-                android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                app:cardBackgroundColor="@color/rp_surface"
-                app:cardCornerRadius="18dp"
-                app:cardElevation="3dp"
-                app:strokeWidth="0dp">
+                <TextView
+                    android:id="@+id/tvTitleRouteHistory"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:text="@string/title_route_history"
+                    android:textColor="@color/rp_text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/ivRouteHistory"
+                    app:layout_constraintTop_toBottomOf="@+id/ivRouteHistory" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                <TextView
+                    android:id="@+id/tvCommentRouteHistory"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="16dp"
+                    android:text="@string/comment_check_your_routes"
+                    android:textColor="@color/rp_text_secondary"
+                    android:textSize="12sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/tvTitleRouteHistory"
+                    app:layout_constraintTop_toBottomOf="@+id/tvTitleRouteHistory" />
 
-                    <ImageView
-                        android:layout_width="42dp"
-                        android:layout_height="42dp"
-                        android:src="@drawable/ic_history"
-                        android:contentDescription="Historial"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Historial"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/rp_text_primary"
-                        android:layout_marginTop="9dp"/>
+        <!-- CONFIGURACIÓN -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cvSettings"
+            android:layout_width="0dp"
+            android:layout_height="168dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="32dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:stateListAnimator="@animator/card_press_animator"
+            app:cardBackgroundColor="@color/rp_surface"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="3dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guideline"
+            app:layout_constraintTop_toBottomOf="@+id/cvDestinations"
+            app:layout_constraintVertical_bias="0.0"
+            app:strokeWidth="0dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Consulta tus recorridos"
-                        android:textSize="12sp"
-                        android:textColor="@color/rp_text_secondary"
-                        android:layout_marginTop="5dp"/>
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-                </LinearLayout>
+                <ImageView
+                    android:id="@+id/ivSettings"
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_settings"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-            </com.google.android.material.card.MaterialCardView>
+                <TextView
+                    android:id="@+id/tvTitleSettings"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:text="@string/title_settings"
+                    android:textColor="@color/rp_text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/ivSettings"
+                    app:layout_constraintTop_toBottomOf="@+id/ivSettings" />
 
-            <!-- CONFIGURACIÓN -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cvSettings"
-                android:layout_width="0dp"
-                android:layout_height="175dp"
-                android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                app:cardBackgroundColor="@color/rp_surface"
-                app:cardCornerRadius="18dp"
-                app:cardElevation="3dp"
-                app:strokeWidth="0dp">
+                <TextView
+                    android:id="@+id/tvCommentSettings"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="16dp"
+                    android:text="@string/comment_customize_the_app"
+                    android:textColor="@color/rp_text_secondary"
+                    android:textSize="12sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/tvTitleSettings"
+                    app:layout_constraintTop_toBottomOf="@+id/tvTitleSettings" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-                    <ImageView
-                        android:layout_width="42dp"
-                        android:layout_height="42dp"
-                        android:src="@drawable/ic_settings"
-                        android:contentDescription="Configuración"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Configuración"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/rp_text_primary"
-                        android:layout_marginTop="9dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Personaliza la aplicación"
-                        android:textSize="12sp"
-                        android:textColor="@color/rp_text_secondary"
-                        android:layout_marginTop="5dp"/>
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-        </LinearLayout>
-
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </ScrollView>

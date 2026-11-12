@@ -1,5 +1,6 @@
 package com.routeplanner.app.activities
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -10,19 +11,18 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.routeplanner.app.R
 
-class SplashActivity : AppCompatActivity() {
-
+@SuppressLint("CustomSplashScreen")
+class SplashActivity : AppCompatActivity()
+{
     private val handler = Handler(Looper.getMainLooper())
 
     private val navigateRunnable = Runnable {
-        startActivity(
-            Intent(this, MainActivity::class.java)
-        )
+        startActivity(Intent(this,MainActivity::class.java))
         finish()
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
         installSplashScreen()
 
         super.onCreate(savedInstanceState)
@@ -30,19 +30,13 @@ class SplashActivity : AppCompatActivity() {
         setContentView(R.layout.activity_splash)
 
         // Obtener referencias
-        val routeMap = findViewById<RouteMapAnimationView>(
-            R.id.routeMap
-        )
-
+        val routeMap = findViewById<RouteMapAnimationView>(R.id.routeMap)
         val title = findViewById<TextView>(R.id.txtTitle)
-
-        val planifica = findViewById<TextView>(R.id.txtPlanifica)
-        val calcula = findViewById<TextView>(R.id.txtCalcula)
-        val optimiza = findViewById<TextView>(R.id.txtOptimiza)
-
+        val planifica = findViewById<TextView>(R.id.txtPlan)
+        val calcula = findViewById<TextView>(R.id.txtCalculate)
+        val optimiza = findViewById<TextView>(R.id.txtOptimizes)
         val dot1 = findViewById<TextView>(R.id.dot1)
         val dot2 = findViewById<TextView>(R.id.dot2)
-        val dot3 = findViewById<TextView>(R.id.dot3)
 
         // 1. Animación del mapa, marcadores y recorrido
         routeMap.startAnimation()
@@ -65,10 +59,9 @@ class SplashActivity : AppCompatActivity() {
 
         // 5. Aparición de Optimiza y su punto
         animateText(optimiza, 4500)
-        animateText(dot3, 4950)
 
         // 6. Acceder a la pantalla principal
-        handler.postDelayed(navigateRunnable, 6200)
+        handler.postDelayed(navigateRunnable, 5750)
     }
 
     private fun animateText(
@@ -85,8 +78,10 @@ class SplashActivity : AppCompatActivity() {
             .start()
     }
 
-    override fun onDestroy() {
+    override fun onDestroy()
+    {
         handler.removeCallbacks(navigateRunnable)
         super.onDestroy()
     }
+
 }

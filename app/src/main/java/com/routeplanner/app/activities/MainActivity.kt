@@ -5,15 +5,12 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.routeplanner.app.databinding.ActivityMainBinding
 import android.content.Intent
-import android.view.MotionEvent
-import android.view.View
-import android.view.animation.DecelerateInterpolator
-import android.view.animation.OvershootInterpolator
 import androidx.lifecycle.lifecycleScope
 import com.routeplanner.app.data.database.RouteDatabase
 import com.routeplanner.app.repository.RouteRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import androidx.core.content.edit
 
 class MainActivity : AppCompatActivity()
 {
@@ -27,13 +24,6 @@ class MainActivity : AppCompatActivity()
         setContentView(binding.root)
 
         configureCardViews()
-
-        addCardAnimation(binding.cvNewRoute)
-        addCardAnimation(binding.cvContinueRoute)
-        addCardAnimation(binding.cvDestinations)
-        addCardAnimation(binding.cvHistory)
-        addCardAnimation(binding.cvSettings)
-
     }
 
     private fun configureCardViews()
@@ -41,16 +31,10 @@ class MainActivity : AppCompatActivity()
         binding.cvNewRoute.setOnClickListener {
 
             // Limpiar las direcciones seleccionadas de la ruta anterior
-            getSharedPreferences("route_preferences",
-                MODE_PRIVATE).edit()
-                .remove("selected_destination_ids")
-                .apply()
+            getSharedPreferences("route_preferences", MODE_PRIVATE).edit {
+                remove("selected_destination_ids") }
 
-            val intent = Intent(
-                this,
-                NewRouteActivity::class.java
-            )
-
+            val intent = Intent(this,NewRouteActivity::class.java)
             startActivity(intent)
         }
 
@@ -59,18 +43,12 @@ class MainActivity : AppCompatActivity()
         }
 
         binding.cvDestinations.setOnClickListener {
-            val intent = android.content.Intent(
-                this,
-                DestinationsActivity::class.java
-            )
+            val intent = Intent(this,DestinationsActivity::class.java)
             startActivity(intent)
         }
 
-        binding.cvHistory.setOnClickListener {
-            val intent = Intent(
-                this,
-                HistoryActivity::class.java
-            )
+        binding.cvRouteHistory.setOnClickListener {
+            val intent = Intent(this,HistoryActivity::class.java)
             startActivity(intent)
         }
 
@@ -80,7 +58,8 @@ class MainActivity : AppCompatActivity()
         }
     }
 
-    private fun continueRoute() {
+    private fun continueRoute()
+    {
         lifecycleScope.launch {
             try {
                 val database = RouteDatabase.getDatabase(applicationContext)
@@ -122,33 +101,4 @@ class MainActivity : AppCompatActivity()
         }
     }
 
-    private fun addCardAnimation(view: View) {
-
-        view.setOnTouchListener { card, event ->
-
-            when (event.action) {
-
-                MotionEvent.ACTION_DOWN -> {
-                    card.animate()
-                        .scaleX(0.90f)
-                        .scaleY(0.90f)
-                        .setDuration(100)
-                        .setInterpolator(DecelerateInterpolator())
-                        .start()
-                }
-
-                MotionEvent.ACTION_UP,
-                MotionEvent.ACTION_CANCEL -> {
-                    card.animate()
-                        .scaleX(1f)
-                        .scaleY(1f)
-                        .setDuration(250)
-                        .setInterpolator(OvershootInterpolator())
-                        .start()
-                }
-            }
-
-            false
-        }
-    }
 }

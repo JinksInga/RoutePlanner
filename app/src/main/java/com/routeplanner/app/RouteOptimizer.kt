@@ -78,13 +78,3 @@ object RouteOptimizer {
         return optimizedRoute
     }
 }
-/*
-* ¿Qué hace este código?
-- Calcula distancias entre coordenadas mediante la fórmula de Haversine.
-- Busca el destino más cercano al origen.
-- Lo añade a la ruta.
-- Utiliza ese destino como nuevo punto de partida.
-- Repite hasta ordenar todos los destinos que tengan coordenadas.
-* Importante: los destinos sin coordenadas quedan fuera del resultado por ahora.
-* Más adelante trataremos ese caso para evitar que desaparezcan silenciosamente
-* de una ruta.*/

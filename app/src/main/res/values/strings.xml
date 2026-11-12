@@ -1,3 +1,86 @@
 <resources>
     <string name="app_name">Route Planner</string>
+
+    <!-- TextView -->
+    <string name="text_dot">•</string>
+    <string name="text_plan">Planifica</string>
+    <string name="text_calculate">Calcula</string>
+    <string name="text_optimizes">Optimiza</string>
+    <string name="text_start">COMENZAR</string>
+    <string name="text_return_origin_switch_on">SI</string>
+    <string name="text_return_origin_switch_off">NO</string>
+
+    <!-- TextInputLayout -->
+    <string name="text_input_route_name">Nombre de la ruta</string>
+
+    <!-- Button -->
+    <string name="btn_current_location">Ubicación actual</string>
+    <string name="btn_manual_steering">Dirección manual</string>
+    <string name="btn_select_destinations">Seleccionar destinos</string>
+    <string name="btn_add_address">Añadir dirección</string>
+    <string name="btn_save_route_changes">Guardar</string>
+
+    <!-- Títulos -->
+    <string name="title_new_route">Nueva ruta</string>
+    <string name="title_edit_route">Modificar ruta</string>
+    <string name="title_ready_to_drive">Listo para conducir</string>
+    <string name="title_continue_route">Continuar ruta</string>
+    <string name="title_my_addresses">Mis direcciones</string>
+    <string name="title_route_history">Historial de rutas</string>
+    <string name="title_settings">Configuración</string>
+    <string name="title_let_us_plan_your_route">Preparemos tu ruta</string>
+    <string name="title_starting_point">PUNTO DE PARTIDA</string>
+    <string name="title_optimization_method">MÉTODO DE OPTIMIZACIÓN</string>
+    <string name="title_route_stops">Paradas de la ruta</string>
+    <string name="title_return_to_origin">Regresar al punto de partida</string>
+
+    <!-- Comentarios -->
+    <string name="comment_intelligent_route_management">GESTIÓN INTELIGENTE DE RUTAS</string>
+    <string name="comment_plan_new_route">Planifica un nuevo recorrido</string>
+    <string name="comment_resume_your_journey">Retoma tu recorrido</string>
+    <string name="comment_manage_your_destinations">Gestiona tus destinos</string>
+    <string name="comment_check_your_routes">Consulta tus recorridos</string>
+    <string name="comment_customize_the_app">Personaliza la aplicación</string>
+    <string name="comment_let_us_plan_your_route">Configura los datos iniciales antes de seleccionar tus destinos.</string>
+    <string name="comment_starting_point">Todavía no has seleccionado un punto de partida</string>
+    <string name="comment_optimization_method">El método elegido determinará el orden de visita de los destinos.</string>
+    <string name="comment_return_to_origin">Añadir el regreso al origen como último tramo después de completar las entregas.</string>
+
+    <!-- Content Description -->
+    <string name="content_description_map_with_navigation_route">Mapa con ruta de navegación</string>
+    <string name="content_description_gps_status">Estado del GPS</string>
+    <string name="content_description_direction_starting_point">Dirección del punto de partida</string>
+    <string name="content_description_add_stop">Añadir parada</string>
+    <string name="content_description_return_to_origin">Activar o desactivar el regreso al punto de partida</string>
+
+    <!-- Array de opciones de optimización -->
+    <string name="optimization_options_nearest_stop">Parada más cercana</string>
+    <string name="optimization_options_global_optimization">Optimización global (Google Routes)</string>
+
+    <string-array name="optimization_options_array">
+        <item>@string/optimization_options_nearest_stop</item>
+        <item>@string/optimization_options_global_optimization</item>
+    </string-array>
+
+    <!-- Mensajes de los Banners / Estados -->
+    <string name="banner_message_location_permission_needed">Necesitamos permiso de ubicación para obtener tu posición.</string>
+    <string name="banner_message_select_starting_point">Primero debes seleccionar un punto de partida.</string>
+    <string name="banner_message_getting_location">Obteniendo ubicación……</string>
+    <string name="banner_message_location_success">Ubicación obtenida correctamente.</string>
+    <string name="banner_message_location_error">No se pudo obtener la ubicación. Comprueba que el GPS está activado.</string>
+    <string name="banner_message_permission_denied">No tenemos permiso para acceder a la ubicación.</string>
+    <string name="banner_message_address_not_found">No se pudo identificar la dirección seleccionada</string>
+    <string name="banner_message_google_no_coordinates">Google no ha devuelto las coordenadas</string>
+    <string name="banner_message_starting_point_selected">Punto de partida seleccionado.</string>
+
+    <!-- Textos informativos y plantillas con formato -->
+    <string name="location_gps_unavailable">Ubicación GPS (dirección no disponible).</string>
+    <string name="location_error_retrieving">Error al obtener la ubicación:\n%s</string>
+    <string name="location_google_places_not_opened">No se pudo abrir Google Places:\n%s</string>
+    <string name="location_current_format">Ubicación actual:\n%s</string>
+    <string name="location_manual_format">Dirección manual:\n%s</string>
+
+    <!-- Errores de validación de campos -->
+    <string name="error_route_name_required">Introduce un nombre para la ruta.</string>
+
 </resources>

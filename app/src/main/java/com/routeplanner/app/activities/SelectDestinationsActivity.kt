@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -38,6 +39,7 @@ class SelectDestinationsActivity : AppCompatActivity() {
     private var originLongitude: Double = 0.0
     private var originAddress: String = ""
     private var optimizationType: String = "NEAREST"
+    private var returnToOrigin: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,6 +83,11 @@ class SelectDestinationsActivity : AppCompatActivity() {
         optimizationType = intent.getStringExtra(
             NewRouteActivity.EXTRA_OPTIMIZATION_TYPE
         ) ?: "NEAREST"
+
+        returnToOrigin = intent.getBooleanExtra(
+            NewRouteActivity.EXTRA_RETURN_TO_ORIGIN,
+            false
+        )
 
         if (routeName.isBlank() ||
             originAddress.isBlank() ||
@@ -183,6 +190,21 @@ class SelectDestinationsActivity : AppCompatActivity() {
 
         binding.btnCalculateRoute.setOnClickListener {
             calculateRoute()
+        }
+
+        binding.btnAddDestination.setOnClickListener {
+
+            val intent = Intent(
+                this,
+                DestinationsActivity::class.java
+            ).apply {
+                putExtra(
+                    DestinationsActivity.EXTRA_RETURN_AFTER_ADD,
+                    true
+                )
+            }
+
+            addDestinationLauncher.launch(intent)
         }
     }
 
@@ -303,7 +325,8 @@ class SelectDestinationsActivity : AppCompatActivity() {
                     originAddress = originAddress,
                     originLatitude = originLatitude,
                     originLongitude = originLongitude,
-                    optimizationType = "NEAREST"
+                    optimizationType = "NEAREST",
+                    returnToOrigin = returnToOrigin
                 )
 
                 // Crear las paradas según el orden optimizado.
@@ -364,4 +387,36 @@ class SelectDestinationsActivity : AppCompatActivity() {
             }
         }
     }
+
+    private val addDestinationLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+
+            if (result.resultCode == RESULT_OK) {
+
+                val destinationId = result.data?.getIntExtra(
+                    DestinationsActivity.EXTRA_CREATED_DESTINATION_ID,
+                    -1
+                ) ?: -1
+
+                if (destinationId != -1) {
+
+                    val selectedIds = getSelectedDestinations().toMutableSet()
+                    selectedIds.add(destinationId)
+
+                    saveSelectedDestinations(selectedIds)
+
+                    lifecycleScope.launch {
+                        val destinations = repository
+                            .getAllDestinations()
+                            .first()
+
+                        adapter.updateDestinations(destinations)
+                        adapter.restoreSelection(selectedIds)
+                    }
+                }
+            }
+        }
+
 }

@@ -2,6 +2,8 @@ package com.routeplanner.app.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -12,6 +14,7 @@ import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.widget.PlaceAutocomplete
 import com.routeplanner.app.BuildConfig
+import com.routeplanner.app.R
 import com.routeplanner.app.adapters.EditRouteStopAdapter
 import com.routeplanner.app.data.database.RouteDatabase
 import com.routeplanner.app.data.database.entity.DestinationEntity
@@ -35,11 +38,14 @@ class EditRouteActivity : AppCompatActivity() {
     private var routeId: Int = -1
     private val editedStops = mutableListOf<RouteStopEntity>()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
         super.onCreate(savedInstanceState)
 
         binding = ActivityEditRouteBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        setSupportActionBar(binding.toolbar)
 
         if (!Places.isInitialized()) {
             Places.initializeWithNewPlacesApiEnabled(
@@ -77,12 +83,8 @@ class EditRouteActivity : AppCompatActivity() {
             finish()
         }
 
-        binding.btnAddRouteStop.setOnClickListener {
+        binding.fabAddRouteStop.setOnClickListener {
             showAddStopOptions()
-        }
-
-        binding.btnSaveRouteChanges.setOnClickListener {
-            saveChanges()
         }
 
         loadRoute()
@@ -237,7 +239,7 @@ class EditRouteActivity : AppCompatActivity() {
                     return@launch
                 }
 
-                binding.tvEditRouteName.text = route.name
+                binding.etEditRouteName.setText(route.name)
                 binding.tvEditRouteOrigin.text =
                     "Origen: ${route.originAddress}"
 
@@ -308,6 +310,20 @@ class EditRouteActivity : AppCompatActivity() {
                     return@launch
                 }
 
+                val newRouteName = binding.etEditRouteName.text
+                    ?.toString()
+                    ?.trim()
+                    .orEmpty()
+
+                if (newRouteName.isBlank()) {
+                    binding.tilEditRouteName.error =
+                        getString(R.string.error_route_name_required)
+                    binding.etEditRouteName.requestFocus()
+                    return@launch
+                }
+
+                binding.tilEditRouteName.error = null
+
                 val completedStops = routeStopRepository
                     .getStopsByRoute(routeId)
                     .first()
@@ -349,6 +365,14 @@ class EditRouteActivity : AppCompatActivity() {
                         routeStopRepository.update(updatedStop)
                     }
                 }
+
+                // Actualizar el nombre de la ruta
+                routeRepository.update(
+                    route.copy(
+                        name = newRouteName,
+                        updatedAt = System.currentTimeMillis()
+                    )
+                )
 
                 Toast.makeText(
                     this@EditRouteActivity,
@@ -457,6 +481,21 @@ class EditRouteActivity : AppCompatActivity() {
             "Nueva parada añadida. Pulsa Guardar cambios para conservarla.",
             Toast.LENGTH_LONG
         ).show()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_edit_route, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_save_route -> {
+                saveChanges()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
 }

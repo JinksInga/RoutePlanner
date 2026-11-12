@@ -1,13 +1,12 @@
 package com.routeplanner.app.activities
 
 import android.Manifest
-import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.os.Bundle
+import android.view.View
 import android.widget.ArrayAdapter
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -21,11 +20,15 @@ import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.widget.PlaceAutocomplete
 import com.routeplanner.app.BuildConfig
+import com.routeplanner.app.R
 import com.routeplanner.app.databinding.ActivityNewRouteBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Locale
+import androidx.core.content.edit
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 class NewRouteActivity : AppCompatActivity()
 {
@@ -36,13 +39,14 @@ class NewRouteActivity : AppCompatActivity()
         const val EXTRA_ORIGIN_LONGITUDE = "originLongitude"
         const val EXTRA_ORIGIN_ADDRESS = "originAddress"
         const val EXTRA_OPTIMIZATION_TYPE = "optimizationType"
+        const val EXTRA_RETURN_TO_ORIGIN = "returnToOrigin"
     }
 
     private lateinit var binding: ActivityNewRouteBinding
     private lateinit var fusedLocationClient:
             com.google.android.gms.location.FusedLocationProviderClient
     private lateinit var placesClient: PlacesClient
-
+    private lateinit var optimizationOptions: List<String>
     private val AUTOCOMPLETE_ORIGIN_REQUEST_CODE = 1002
     private var cancellationTokenSource: CancellationTokenSource? = null
 
@@ -54,11 +58,6 @@ class NewRouteActivity : AppCompatActivity()
     private val preferences by lazy {
         getSharedPreferences("route_preferences", MODE_PRIVATE)
     }
-
-    private val optimizationOptions = listOf(
-        "Vecino más cercano",
-        "Optimización global (Google Routes)"
-    )
 
     private val locationPermissionLauncher =
         registerForActivityResult(
@@ -74,11 +73,9 @@ class NewRouteActivity : AppCompatActivity()
             if (fineGranted || coarseGranted) {
                 getCurrentLocation()
             } else {
-                Toast.makeText(
-                    this,
-                    "Necesitamos permiso de ubicación para obtener tu posición.",
-                    Toast.LENGTH_LONG
-                ).show()
+                showBannerState(
+                    getString(R.string.banner_message_location_permission_needed),
+                    BannerType.WARNING)
             }
         }
 
@@ -97,8 +94,9 @@ class NewRouteActivity : AppCompatActivity()
 
         placesClient = Places.createClient(this)
 
-        fusedLocationClient =
-            LocationServices.getFusedLocationProviderClient(this)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        optimizationOptions = this.resources.getStringArray(R.array.optimization_options_array).toList()
 
         configureToolbar()
         configureOptimizationDropdown()
@@ -132,14 +130,14 @@ class NewRouteActivity : AppCompatActivity()
                 "NEAREST"
             }
 
-            preferences.edit()
-                .putString("optimization_type", optimizationType)
-                .apply()
+            preferences.edit {
+                putString("optimization_type", optimizationType)
+            }
         }
     }
 
-    private fun loadOptimizationPreference() {
-
+    private fun loadOptimizationPreference()
+    {
         val optimizationType = preferences.getString(
             "optimization_type",
             "NEAREST"
@@ -178,7 +176,7 @@ class NewRouteActivity : AppCompatActivity()
             .orEmpty()
 
         if (routeName.isBlank()) {
-            binding.tilRouteName.error = "Introduce un nombre para la ruta."
+            binding.tilRouteName.error = getString(R.string.error_route_name_required)
             binding.etRouteName.requestFocus()
             return
         }
@@ -194,11 +192,9 @@ class NewRouteActivity : AppCompatActivity()
             originLongitude == null ||
             originAddress == null
         ) {
-            Toast.makeText(
-                this,
-                "Primero debes seleccionar un punto de partida.",
-                Toast.LENGTH_LONG
-            ).show()
+            showBannerState(
+                getString(R.string.banner_message_select_starting_point),
+                BannerType.ERROR)
             return
         }
 
@@ -208,10 +204,13 @@ class NewRouteActivity : AppCompatActivity()
             "NEAREST"
         ) ?: "NEAREST"
 
+        // Recuperar la opción de regreso al punto de partida.
+        val returnToOrigin = binding.switchReturnToOrigin.isChecked
+
         // Guardar el nombre de la ruta.
-        preferences.edit()
-            .putString("route_name", routeName)
-            .apply()
+        preferences.edit {
+            putString("route_name", routeName)
+        }
 
         // Abrir la pantalla de selección de destinos.
         val intent = Intent(
@@ -224,6 +223,7 @@ class NewRouteActivity : AppCompatActivity()
             putExtra(EXTRA_ORIGIN_LONGITUDE, originLongitude)
             putExtra(EXTRA_ORIGIN_ADDRESS, originAddress)
             putExtra(EXTRA_OPTIMIZATION_TYPE, optimizationType)
+            putExtra(EXTRA_RETURN_TO_ORIGIN, returnToOrigin)
         }
 
         startActivity(intent)
@@ -238,15 +238,15 @@ class NewRouteActivity : AppCompatActivity()
 
             startActivityForResult(
                 intent,
-                AUTOCOMPLETE_ORIGIN_REQUEST_CODE
-            )
+                AUTOCOMPLETE_ORIGIN_REQUEST_CODE)
 
-        } catch (e: Exception) {
-            Toast.makeText(
-                this,
-                "No se pudo abrir Google Places: ${e.message}",
-                Toast.LENGTH_LONG
-            ).show()
+        }
+        catch (e: Exception)
+        {
+            showBannerState(getString(
+                R.string.location_google_places_not_opened,
+                e.message),
+                BannerType.ERROR)
         }
     }
 
@@ -279,11 +279,9 @@ class NewRouteActivity : AppCompatActivity()
         cancellationTokenSource?.cancel()
         cancellationTokenSource = CancellationTokenSource()
 
-        Toast.makeText(
-            this,
-            "Obteniendo ubicación...",
-            Toast.LENGTH_SHORT
-        ).show()
+        showBannerState(
+            getString(R.string.banner_message_getting_location),
+            BannerType.LOADING)
 
         try {
             fusedLocationClient.getCurrentLocation(
@@ -317,40 +315,42 @@ class NewRouteActivity : AppCompatActivity()
                             }
                         }
 
-                        selectedOriginAddress = address
-                            ?: "Ubicación GPS (dirección no disponible)"
+                        selectedOriginAddress = address?: getString(R.string.location_gps_unavailable)
 
-                        binding.tvSelectedOrigin.text = selectedOriginAddress
+                        binding.tvSelectedOrigin.text = getString(
+                            R.string.location_current_format,
+                            selectedOriginAddress)
+                        binding.bannerStatus.visibility = View.GONE
 
-                        Toast.makeText(
-                            this@NewRouteActivity,
-                            "Ubicación obtenida correctamente.",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        showBannerState(
+                            getString(R.string.banner_message_location_success),
+                            BannerType.SUCCESS)
+
+                        lifecycleScope.launch {
+                            delay(2000.milliseconds) // Espera 2 segundos
+                            binding.bannerStatus.visibility = View.GONE
+                        }
                     }
-
-                } else {
-                    Toast.makeText(
-                        this,
-                        "No se pudo obtener la ubicación. Comprueba que el GPS está activado.",
-                        Toast.LENGTH_LONG
-                    ).show()
+                }
+                else
+                {
+                    showBannerState(
+                        getString(R.string.banner_message_location_error),
+                        BannerType.ERROR)
                 }
 
             }.addOnFailureListener {
-                Toast.makeText(
-                    this,
-                    "Error al obtener la ubicación: ${it.localizedMessage}",
-                    Toast.LENGTH_LONG
-                ).show()
+                showBannerState(getString(
+                    R.string.location_error_retrieving,
+                    it.localizedMessage),
+                    BannerType.ERROR)
             }
-
-        } catch (_: SecurityException) {
-            Toast.makeText(
-                this,
-                "No tenemos permiso para acceder a la ubicación.",
-                Toast.LENGTH_LONG
-            ).show()
+        }
+        catch (_: SecurityException)
+        {
+            showBannerState(
+                getString(R.string.banner_message_permission_denied),
+                BannerType.ERROR)
         }
     }
 
@@ -366,18 +366,17 @@ class NewRouteActivity : AppCompatActivity()
             return
         }
 
-        if (resultCode != Activity.RESULT_OK || data == null) {
+        if (resultCode != RESULT_OK || data == null) {
             return
         }
 
         val prediction = PlaceAutocomplete.getPredictionFromIntent(data)
 
-        if (prediction == null) {
-            Toast.makeText(
-                this,
-                "No se pudo identificar la dirección seleccionada",
-                Toast.LENGTH_SHORT
-            ).show()
+        if (prediction == null)
+        {
+            showBannerState(
+                getString(R.string.banner_message_address_not_found),
+                BannerType.WARNING)
             return
         }
 
@@ -406,12 +405,11 @@ class NewRouteActivity : AppCompatActivity()
 
                 val location = place.location
 
-                if (location == null) {
-                    Toast.makeText(
-                        this,
-                        "Google no ha devuelto las coordenadas",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                if (location == null)
+                {
+                    showBannerState(
+                        getString(R.string.banner_message_google_no_coordinates),
+                        BannerType.WARNING)
                     return@addOnSuccessListener
                 }
 
@@ -419,22 +417,58 @@ class NewRouteActivity : AppCompatActivity()
                 selectedOriginLongitude = location.longitude
                 selectedOriginAddress = address
 
-                binding.tvSelectedOrigin.text = address
+                binding.tvSelectedOrigin.text = getString(
+                    R.string.location_manual_format,
+                    address)
 
-                Toast.makeText(
-                    this,
-                    "Punto de partida seleccionado",
-                    Toast.LENGTH_SHORT
-                ).show()
+                showBannerState(
+                    getString(R.string.banner_message_starting_point_selected),
+                    BannerType.SUCCESS)
+
+                lifecycleScope.launch {
+                    delay(2000.milliseconds) // Espera 2 segundos
+                    binding.bannerStatus.visibility = View.GONE
+                }
             }
             .addOnFailureListener { exception ->
-
-                Toast.makeText(
-                    this,
-                    "Error al consultar el lugar: ${exception.message}",
-                    Toast.LENGTH_LONG
-                ).show()
+                showBannerState(getString(
+                        R.string.location_error_retrieving,
+                    exception.message),
+                    BannerType.ERROR)
             }
+    }
+
+    private fun showBannerState(message: String, type: BannerType) {
+        binding.bannerStatus.visibility = View.VISIBLE
+        binding.tvBannerMessage.text = message
+
+        when (type)
+        {
+            BannerType.LOADING -> {
+                binding.tvBannerMessage.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                    R.drawable.ic_loading_location_24, 0, 0, 0)
+                binding.bannerStatus.setCardBackgroundColor(getColor(R.color.rp_primary)) }
+
+            BannerType.SUCCESS -> {
+                binding.tvBannerMessage.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                    R.drawable.ic_success_location_24, 0, 0, 0)
+                binding.bannerStatus.setCardBackgroundColor(getColor(R.color.rp_success))}
+
+            BannerType.WARNING -> {
+                binding.tvBannerMessage.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                    R.drawable.ic_warning_location_24, 0, 0, 0)
+                binding.bannerStatus.setCardBackgroundColor(getColor(R.color.rp_warning))}
+
+            BannerType.ERROR -> {
+                binding.tvBannerMessage.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                    R.drawable.ic_error_location_24, 0, 0, 0)
+                binding.bannerStatus.setCardBackgroundColor(getColor(R.color.md_theme_onErrorContainer)) }
+        }
+    }
+
+    // Enum para clasificar los estados
+    enum class BannerType {
+        LOADING, SUCCESS, WARNING, ERROR
     }
 
     override fun onDestroy() {
