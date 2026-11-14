@@ -1,291 +1,384 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/rp_background">
 
-    <!-- BARRA SUPERIOR -->
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
+    <!-- CONTENIDO PRINCIPAL (Toolbar + ScrollView) -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/rp_surface"
-        app:title="@string/title_new_route"
-        app:titleTextColor="@color/rp_text_primary"
-        app:navigationIcon="@drawable/ic_arrow_back_24"
-        app:navigationIconTint="@color/rp_text_primary"
-        app:elevation="2dp" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:fillViewport="true">
-
-        <LinearLayout
+        <!-- BARRA SUPERIOR -->
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="20dp">
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/rp_surface"
+            app:elevation="2dp"
+            app:navigationIcon="@drawable/ic_arrow_back_24"
+            app:navigationIconTint="@color/rp_text_primary"
+            app:title="@string/title_new_route"
+            app:titleTextColor="@color/rp_text_primary" />
 
-            <!-- INTRODUCCIÓN -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/title_let_us_plan_your_route"
-                android:textColor="@color/rp_text_primary"
-                android:textSize="23sp"
-                android:textStyle="bold" />
+        <ScrollView
+            android:id="@+id/scrollView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:fillViewport="true">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:layout_marginBottom="24dp"
-                android:text="@string/comment_let_us_plan_your_route"
-                android:textColor="@color/rp_text_secondary"
-                android:textSize="14sp" />
-
-            <!-- NOMBRE DE LA RUTA -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/tilRouteName"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/text_input_route_name"
-                app:boxStrokeColor="@color/rp_primary"
-                app:hintTextColor="@color/rp_primary">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etRouteName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textCapSentences"
-                    android:maxLines="1"
-                    android:imeOptions="actionNext" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- PUNTO DE PARTIDA -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="28dp"
-                android:layout_marginBottom="10dp"
-                android:text="@string/title_starting_point"
-                android:textColor="@color/rp_text_primary"
-                android:textSize="13sp"
-                android:textStyle="bold" />
-
-            <!-- BANNER DE ESTADO / INLINE ALERT (Oculto por defecto) -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/bannerStatus"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:visibility="gone"
-                app:cardCornerRadius="10dp" >
-
-                <TextView
-                    android:id="@+id/tvBannerMessage"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:contentDescription="@string/content_description_gps_status"
-                    android:drawablePadding="8dp"
-                    android:gravity="center_vertical"
-                    android:padding="4dp"
-                    android:textColor="@color/md_theme_background"
-                    android:textSize="13sp" />
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- DIRECCIÓN SELECCIONADA -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/rp_surface"
-                app:cardCornerRadius="12dp"
-                app:strokeColor="@color/rp_outline"
-                app:strokeWidth="1dp">
-
-                <TextView
-                    android:id="@+id/tvSelectedOrigin"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:gravity="center_vertical"
-                    android:text="@string/comment_starting_point"
-                    android:textColor="@color/rp_text_secondary"
-                    android:textSize="14sp"
-                    android:drawablePadding="16dp"
-                    app:drawableStartCompat="@drawable/ic_home_work_24" />
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- OPCIONES DE ORIGEN -->
+            <!-- paddingBottom="88dp" deja espacio libre al final para que el FAB no tape la última tarjeta -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:orientation="horizontal"
-                android:weightSum="2">
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="20dp"
+                android:paddingBottom="88dp">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnCurrentLocation"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="6dp"
-                    android:layout_weight="1"
-                    android:minHeight="52dp"
-                    android:text="@string/btn_current_location"
-                    android:textColor="@color/rp_text_primary"
-                    app:backgroundTint="@color/rp_icon_background"
-                    app:cornerRadius="10dp"
-                    app:icon="@drawable/ic_my_location_24"
-                    app:iconGravity="textStart"
-                    app:iconSize="24dp"
-                    app:iconTint="@null" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnManualOrigin"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
-                    android:layout_weight="1"
-                    android:minHeight="52dp"
-                    android:text="@string/btn_manual_steering"
-                    android:textColor="@color/rp_text_primary"
-                    app:backgroundTint="@color/rp_icon_background"
-                    app:cornerRadius="10dp"
-                    app:icon="@drawable/ic_search_address_24"
-                    app:iconGravity="textStart"
-                    app:iconSize="24dp"
-                    app:iconTint="@null" />
-
-            </LinearLayout>
-
-            <!-- METHOD DE OPTIMIZACIÓN -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
-                android:layout_marginBottom="10dp"
-                android:text="@string/title_optimization_method"
-                android:textColor="@color/rp_text_primary"
-                android:textSize="13sp"
-                android:textStyle="bold" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/tilOptimization"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:boxStrokeColor="@color/rp_primary">
-
-                <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                    android:id="@+id/actOptimization"
+                <!-- CABECERA DE PANTALLA -->
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:importantForAutofill="no"
-                    android:inputType="none"
+                    android:paddingHorizontal="4dp"
+                    android:text="@string/title_let_us_plan_your_route"
                     android:textColor="@color/rp_text_primary"
-                    tools:text="Método de optimización" />
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
 
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/comment_optimization_method"
-                android:textColor="@color/rp_text_secondary"
-                android:textSize="12sp" />
-
-            <!-- REGRESO AL PUNTO DE PARTIDA -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                app:cardBackgroundColor="@color/rp_surface"
-                app:cardCornerRadius="12dp"
-                app:strokeColor="@color/rp_outline"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:padding="16dp">
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="20dp"
+                    android:paddingHorizontal="4dp"
+                    android:text="@string/comment_let_us_plan_your_route"
+                    android:textColor="@color/rp_text_secondary"
+                    android:textSize="14sp" />
+
+                <!-- ========================================== -->
+                <!-- SECCIÓN 1: NOMBRE DE LA RUTA               -->
+                <!-- ========================================== -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardBackgroundColor="@color/rp_surface"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/rp_outline"
+                    app:strokeWidth="1dp">
 
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:padding="16dp">
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/title_return_to_origin"
-                            android:textColor="@color/rp_text_primary"
-                            android:textSize="15sp"
+                            android:layout_marginBottom="10dp"
+                            android:letterSpacing="0.05"
+                            android:text="@string/title_route_name"
+                            android:textAllCaps="true"
+                            android:textColor="@color/rp_primary"
+                            android:textSize="12sp"
                             android:textStyle="bold" />
 
-                        <TextView
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilRouteName"
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="5dp"
-                            android:text="@string/comment_return_to_origin"
-                            android:textColor="@color/rp_text_secondary"
-                            android:textSize="12sp" />
+                            android:hint="@string/hint_route_name_example"
+                            app:boxCornerRadiusBottomEnd="12dp"
+                            app:boxCornerRadiusBottomStart="12dp"
+                            app:boxCornerRadiusTopEnd="12dp"
+                            app:boxCornerRadiusTopStart="12dp"
+                            app:boxStrokeColor="@color/rp_primary"
+                            app:endIconMode="clear_text"
+                            app:hintTextColor="@color/rp_primary">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etRouteName"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:imeOptions="actionNext"
+                                android:inputType="textCapSentences"
+                                android:maxLines="1" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
 
                     </LinearLayout>
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/switchReturnToOrigin"
-                        android:layout_width="wrap_content"
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- ========================================== -->
+                <!-- SECCIÓN 2: PUNTO DE PARTIDA                -->
+                <!-- ========================================== -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    app:cardBackgroundColor="@color/rp_surface"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/rp_outline"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:checked="true"
-                        android:contentDescription="@string/content_description_return_to_origin"
-                        android:textOff="@string/text_return_origin_switch_off"
-                        android:textOn="@string/text_return_origin_switch_on"
-                        app:showText="true"
-                        app:switchTextAppearance="@style/SwitchTextAppearance"
-                        app:thumbTextPadding="3dp" />
+                        android:orientation="vertical"
+                        android:padding="16dp">
 
-                </LinearLayout>
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="12dp"
+                            android:letterSpacing="0.05"
+                            android:text="@string/title_starting_point"
+                            android:textAllCaps="true"
+                            android:textColor="@color/rp_primary"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
 
-            </com.google.android.material.card.MaterialCardView>
+                        <!-- BANNER DE ESTADO / INLINE ALERT -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/bannerStatus"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="12dp"
+                            android:visibility="gone"
+                            app:cardCornerRadius="10dp"
+                            app:cardElevation="0dp">
 
-        </LinearLayout>
+                            <TextView
+                                android:id="@+id/tvBannerMessage"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:contentDescription="@string/content_description_gps_status"
+                                android:drawablePadding="8dp"
+                                android:gravity="center_vertical"
+                                android:paddingHorizontal="12dp"
+                                android:paddingVertical="8dp"
+                                android:textColor="@color/md_theme_background"
+                                android:textSize="13sp" />
 
-    </ScrollView>
+                        </com.google.android.material.card.MaterialCardView>
 
-    <!-- ACCIÓN INFERIOR -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/rp_surface"
-        android:elevation="6dp"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="16dp">
+                        <!-- CAJA DE DIRECCIÓN SELECCIONADA -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:cardBackgroundColor="@color/rp_background"
+                            app:cardCornerRadius="12dp"
+                            app:cardElevation="0dp"
+                            app:strokeWidth="0dp">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSelectDestinations"
-            android:layout_width="320dp"
-            android:layout_height="wrap_content"
-            android:text="@string/btn_select_destinations"
-            app:cornerRadius="16dp"
-            app:icon="@drawable/ic_arrow_forward_24"
-            app:iconGravity="end" />
+                            <TextView
+                                android:id="@+id/tvSelectedOrigin"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:drawablePadding="12dp"
+                                android:gravity="center_vertical"
+                                android:padding="14dp"
+                                android:text="@string/comment_starting_point"
+                                android:textColor="@color/rp_text_secondary"
+                                android:textSize="14sp"
+                                app:drawableStartCompat="@drawable/ic_home_work_24" />
+
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <!-- BOTONES DE ACCIÓN DE ORIGEN -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:orientation="horizontal"
+                            android:weightSum="2">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnCurrentLocation"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="4dp"
+                                android:layout_weight="1"
+                                android:minHeight="48dp"
+                                android:text="@string/btn_current_location"
+                                android:textColor="@color/rp_text_primary"
+                                app:backgroundTint="@color/rp_icon_background"
+                                app:cornerRadius="12dp"
+                                app:elevation="0dp"
+                                app:icon="@drawable/ic_my_location_24"
+                                app:iconGravity="textStart"
+                                app:iconSize="20dp"
+                                app:iconTint="@null" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnManualOrigin"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="4dp"
+                                android:layout_weight="1"
+                                android:minHeight="48dp"
+                                android:text="@string/btn_manual_steering"
+                                android:textColor="@color/rp_text_primary"
+                                app:backgroundTint="@color/rp_icon_background"
+                                app:cornerRadius="12dp"
+                                app:elevation="0dp"
+                                app:icon="@drawable/ic_search_address_24"
+                                app:iconGravity="textStart"
+                                app:iconSize="20dp"
+                                app:iconTint="@null" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- ========================================== -->
+                <!-- SECCIÓN 3: CONFIGURACIÓN DE LA RUTA        -->
+                <!-- ========================================== -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    app:cardBackgroundColor="@color/rp_surface"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/rp_outline"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"
+                            android:letterSpacing="0.05"
+                            android:text="@string/title_optimization_method"
+                            android:textAllCaps="true"
+                            android:textColor="@color/rp_primary"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilOptimization"
+                            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:boxCornerRadiusBottomEnd="12dp"
+                            app:boxCornerRadiusBottomStart="12dp"
+                            app:boxCornerRadiusTopEnd="12dp"
+                            app:boxCornerRadiusTopStart="12dp"
+                            app:boxStrokeColor="@color/rp_primary">
+
+                            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                                android:id="@+id/actOptimization"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:importantForAutofill="no"
+                                android:inputType="none"
+                                android:textColor="@color/rp_text_primary"
+                                tools:text="Método de optimización" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/comment_optimization_method"
+                            android:textColor="@color/rp_text_secondary"
+                            android:textSize="12sp" />
+
+                        <!-- SEPARADOR INTERNO -->
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginVertical="16dp"
+                            android:alpha="0.5"
+                            android:background="@color/rp_outline" />
+
+                        <!-- OPCIÓN REGRESO AL ORIGEN -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/title_return_to_origin"
+                                    android:textColor="@color/rp_text_primary"
+                                    android:textSize="15sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="3dp"
+                                    android:text="@string/comment_return_to_origin"
+                                    android:textColor="@color/rp_text_secondary"
+                                    android:textSize="12sp" />
+
+                            </LinearLayout>
+
+                            <com.google.android.material.switchmaterial.SwitchMaterial
+                                android:id="@+id/switchReturnToOrigin"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="12dp"
+                                android:contentDescription="@string/content_description_return_to_origin"
+                                android:textOff="@string/text_return_origin_switch_off"
+                                android:textOn="@string/text_return_origin_switch_on"
+                                app:showText="true"
+                                app:switchTextAppearance="@style/SwitchTextAppearance"
+                                app:thumbTextPadding="3dp" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+        </ScrollView>
 
     </LinearLayout>
 
-</LinearLayout>
+    <!-- BOTÓN FLOTANTE EXTENDIDO -->
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fabSelectDestinations"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:text="@string/btn_select_destinations"
+        android:textColor="@android:color/white"
+        app:backgroundTint="@color/rp_primary"
+        app:icon="@drawable/ic_arrow_forward_24"
+        app:iconGravity="end"
+        app:iconTint="@android:color/white" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

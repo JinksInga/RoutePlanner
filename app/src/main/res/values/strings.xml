@@ -11,7 +11,7 @@
     <string name="text_return_origin_switch_off">NO</string>
 
     <!-- TextInputLayout -->
-    <string name="text_input_route_name">Nombre de la ruta</string>
+    <string name="hint_route_name_example">Ejemplo: Ruta mañanas</string>
 
     <!-- Button -->
     <string name="btn_current_location">Ubicación actual</string>
@@ -29,6 +29,7 @@
     <string name="title_route_history">Historial de rutas</string>
     <string name="title_settings">Configuración</string>
     <string name="title_let_us_plan_your_route">Preparemos tu ruta</string>
+    <string name="title_route_name">NOMBRE DE LA RUTA</string>
     <string name="title_starting_point">PUNTO DE PARTIDA</string>
     <string name="title_optimization_method">MÉTODO DE OPTIMIZACIÓN</string>
     <string name="title_route_stops">Paradas de la ruta</string>

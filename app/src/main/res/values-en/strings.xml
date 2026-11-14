@@ -7,7 +7,7 @@
     <string name="text_optimizes">Optimizes</string>
     <string name="text_return_origin_switch_on">YES</string>
     <string name="text_return_origin_switch_off">NO</string>
-    <string name="text_input_route_name">Route name</string>
+    <string name="hint_route_name_example">Example: Morning route</string>
     <string name="btn_current_location">Current location</string>
     <string name="btn_manual_steering">Manual steering</string>
     <string name="btn_select_destinations">Select destinations</string>
@@ -21,6 +21,7 @@
     <string name="title_route_history">Route history</string>
     <string name="title_settings">Settings</string>
     <string name="title_let_us_plan_your_route">Let\'s plan your route</string>
+    <string name="title_route_name">ROUTE NAME</string>
     <string name="title_starting_point">STARTING POINT</string>
     <string name="title_optimization_method">OPTIMIZATION METHOD</string>
     <string name="title_route_stops">Route stops</string>

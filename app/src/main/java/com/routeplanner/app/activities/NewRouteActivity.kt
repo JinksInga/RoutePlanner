@@ -29,6 +29,44 @@ import java.util.Locale
 import androidx.core.content.edit
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
+import android.location.Address
+import android.os.Build
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+
+private suspend fun Geocoder.getAddressLineCompat(
+    latitude: Double,
+    longitude: Double
+): String? {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        suspendCancellableCoroutine { continuation ->
+            getFromLocation(latitude, longitude, 1, object : Geocoder.GeocodeListener {
+                override fun onGeocode(addresses: MutableList<Address>) {
+                    if (continuation.isActive) {
+                        continuation.resume(addresses.firstOrNull()?.getAddressLine(0))
+                    }
+                }
+
+                override fun onError(errorMessage: String?) {
+                    if (continuation.isActive) {
+                        continuation.resume(null)
+                    }
+                }
+            })
+        }
+    } else {
+        withContext(Dispatchers.IO) {
+            try {
+                @Suppress("DEPRECATION")
+                getFromLocation(latitude, longitude, 1)
+                    ?.firstOrNull()
+                    ?.getAddressLine(0)
+            } catch (_: Exception) {
+                null
+            }
+        }
+    }
+}
 
 class NewRouteActivity : AppCompatActivity()
 {
@@ -47,7 +85,6 @@ class NewRouteActivity : AppCompatActivity()
             com.google.android.gms.location.FusedLocationProviderClient
     private lateinit var placesClient: PlacesClient
     private lateinit var optimizationOptions: List<String>
-    private val AUTOCOMPLETE_ORIGIN_REQUEST_CODE = 1002
     private var cancellationTokenSource: CancellationTokenSource? = null
 
     // Coordenadas del punto de partida.
@@ -77,6 +114,87 @@ class NewRouteActivity : AppCompatActivity()
                     getString(R.string.banner_message_location_permission_needed),
                     BannerType.WARNING)
             }
+        }
+
+    private val originAutocompleteLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            val data = result.data
+            if (result.resultCode != RESULT_OK || data == null) {
+                return@registerForActivityResult
+            }
+
+            val prediction = PlaceAutocomplete.getPredictionFromIntent(data)
+
+            if (prediction == null) {
+                showBannerState(
+                    getString(R.string.banner_message_address_not_found),
+                    BannerType.WARNING
+                )
+                return@registerForActivityResult
+            }
+
+            val sessionToken =
+                PlaceAutocomplete.getSessionTokenFromIntent(data)
+
+            val placeFields = listOf(
+                Place.Field.FORMATTED_ADDRESS,
+                Place.Field.LOCATION
+            )
+
+            val request = FetchPlaceRequest.builder(
+                prediction.placeId,
+                placeFields
+            )
+                .setSessionToken(sessionToken)
+                .build()
+
+            placesClient.fetchPlace(request)
+                .addOnSuccessListener { response ->
+                    val place = response.place
+
+                    val address = place.formattedAddress
+                        ?: prediction.getFullText(null).toString()
+
+                    val location = place.location
+
+                    if (location == null) {
+                        showBannerState(
+                            getString(R.string.banner_message_google_no_coordinates),
+                            BannerType.WARNING
+                        )
+                        return@addOnSuccessListener
+                    }
+
+                    selectedOriginLatitude = location.latitude
+                    selectedOriginLongitude = location.longitude
+                    selectedOriginAddress = address
+
+                    binding.tvSelectedOrigin.text = getString(
+                        R.string.location_manual_format,
+                        address
+                    )
+
+                    showBannerState(
+                        getString(R.string.banner_message_starting_point_selected),
+                        BannerType.SUCCESS
+                    )
+
+                    lifecycleScope.launch {
+                        delay(2000.milliseconds) // Espera 2 segundos
+                        binding.bannerStatus.visibility = View.GONE
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    showBannerState(
+                        getString(
+                            R.string.location_error_retrieving,
+                            exception.message
+                        ),
+                        BannerType.ERROR
+                    )
+                }
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -120,10 +238,10 @@ class NewRouteActivity : AppCompatActivity()
             optimizationOptions
         )
 
+        @Suppress("UsePropertyAccessSyntax")
         binding.actOptimization.setAdapter(adapter)
 
         binding.actOptimization.setOnItemClickListener { _, _, position, _ ->
-
             val optimizationType = if (position == 1) {
                 "GLOBAL"
             } else {
@@ -162,7 +280,7 @@ class NewRouteActivity : AppCompatActivity()
             launchOriginAutocomplete()
         }
 
-        binding.btnSelectDestinations.setOnClickListener {
+        binding.fabSelectDestinations.setOnClickListener {
             continueToDestinations()
         }
     }
@@ -230,23 +348,19 @@ class NewRouteActivity : AppCompatActivity()
     }
 
     private fun launchOriginAutocomplete() {
-
         try {
             val intent = PlaceAutocomplete.createIntent(this) {
                 setCountries(listOf("ES"))
             }
-
-            startActivityForResult(
-                intent,
-                AUTOCOMPLETE_ORIGIN_REQUEST_CODE)
-
-        }
-        catch (e: Exception)
-        {
-            showBannerState(getString(
-                R.string.location_google_places_not_opened,
-                e.message),
-                BannerType.ERROR)
+            originAutocompleteLauncher.launch(intent)
+        } catch (e: Exception) {
+            showBannerState(
+                getString(
+                    R.string.location_google_places_not_opened,
+                    e.message
+                ),
+                BannerType.ERROR
+            )
         }
     }
 
@@ -296,24 +410,14 @@ class NewRouteActivity : AppCompatActivity()
 
                     lifecycleScope.launch {
 
-                        val address = withContext(Dispatchers.IO) {
-                            try {
-                                val geocoder = Geocoder(
-                                    this@NewRouteActivity,
-                                    Locale("es", "ES")
-                                )
-
-                                @Suppress("DEPRECATION")
-                                geocoder.getFromLocation(
-                                    location.latitude,
-                                    location.longitude,
-                                    1
-                                )?.firstOrNull()?.getAddressLine(0)
-
-                            } catch (_: Exception) {
-                                null
-                            }
-                        }
+                        val geocoder = Geocoder(
+                            this@NewRouteActivity,
+                            Locale.forLanguageTag("es-ES")
+                        )
+                        val address = geocoder.getAddressLineCompat(
+                            location.latitude,
+                            location.longitude
+                        )
 
                         selectedOriginAddress = address?: getString(R.string.location_gps_unavailable)
 
@@ -352,90 +456,6 @@ class NewRouteActivity : AppCompatActivity()
                 getString(R.string.banner_message_permission_denied),
                 BannerType.ERROR)
         }
-    }
-
-    @Suppress("DEPRECATION")
-    override fun onActivityResult(
-        requestCode: Int,
-        resultCode: Int,
-        data: Intent?
-    ) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode != AUTOCOMPLETE_ORIGIN_REQUEST_CODE) {
-            return
-        }
-
-        if (resultCode != RESULT_OK || data == null) {
-            return
-        }
-
-        val prediction = PlaceAutocomplete.getPredictionFromIntent(data)
-
-        if (prediction == null)
-        {
-            showBannerState(
-                getString(R.string.banner_message_address_not_found),
-                BannerType.WARNING)
-            return
-        }
-
-        val sessionToken =
-            PlaceAutocomplete.getSessionTokenFromIntent(data)
-
-        val placeFields = listOf(
-            Place.Field.FORMATTED_ADDRESS,
-            Place.Field.LOCATION
-        )
-
-        val request = FetchPlaceRequest.builder(
-            prediction.placeId,
-            placeFields
-        )
-            .setSessionToken(sessionToken)
-            .build()
-
-        placesClient.fetchPlace(request)
-            .addOnSuccessListener { response ->
-
-                val place = response.place
-
-                val address = place.formattedAddress
-                    ?: prediction.getFullText(null).toString()
-
-                val location = place.location
-
-                if (location == null)
-                {
-                    showBannerState(
-                        getString(R.string.banner_message_google_no_coordinates),
-                        BannerType.WARNING)
-                    return@addOnSuccessListener
-                }
-
-                selectedOriginLatitude = location.latitude
-                selectedOriginLongitude = location.longitude
-                selectedOriginAddress = address
-
-                binding.tvSelectedOrigin.text = getString(
-                    R.string.location_manual_format,
-                    address)
-
-                showBannerState(
-                    getString(R.string.banner_message_starting_point_selected),
-                    BannerType.SUCCESS)
-
-                lifecycleScope.launch {
-                    delay(2000.milliseconds) // Espera 2 segundos
-                    binding.bannerStatus.visibility = View.GONE
-                }
-            }
-            .addOnFailureListener { exception ->
-                showBannerState(getString(
-                        R.string.location_error_retrieving,
-                    exception.message),
-                    BannerType.ERROR)
-            }
     }
 
     private fun showBannerState(message: String, type: BannerType) {
