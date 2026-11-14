@@ -17,19 +17,20 @@
         app:titleTextColor="#183153"
         app:navigationIcon="@drawable/ic_arrow_back_24" />
 
+
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardReturnToOrigin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="2dp"
-        app:strokeColor="#DCE5F0"
-        app:strokeWidth="1dp"
-        app:cardBackgroundColor="#FFFFFF"
         android:clickable="true"
         android:focusable="true"
-        android:foreground="?attr/selectableItemBackground">
+        android:foreground="?attr/selectableItemBackground"
+        app:cardBackgroundColor="@color/rp_surface"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="2dp"
+        app:strokeColor="@color/rp_outline"
+        app:strokeWidth="1dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -44,20 +45,35 @@
                 android:orientation="horizontal">
 
                 <ImageView
+                    android:id="@+id/ivOriginIcon"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/ic_home_work_24"
                     android:contentDescription="@null"
-                    app:tint="#2563EB" />
+                    app:tint="@color/rp_primary" />
 
                 <TextView
+                    android:id="@+id/tvOriginTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:text="Punto de partida"
-                    android:textColor="#183153"
+                    android:textColor="@color/rp_text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
+
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <ImageView
+                    android:id="@+id/ivReturnToOriginStatus"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:contentDescription="Estado del regreso al origen"
+                    android:src="@drawable/ic_arrow_circle_right_24"
+                    app:tint="@color/rp_primary" />
 
             </LinearLayout>
 
@@ -66,18 +82,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:textColor="#64748B"
+                android:textColor="@color/rp_text_secondary"
                 android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/tvReturnToOriginStatus"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="Regresar al punto de partida"
-                android:textColor="#2563EB"
-                android:textSize="14sp"
-                android:textStyle="bold" />
 
         </LinearLayout>
 

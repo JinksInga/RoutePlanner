@@ -81,10 +81,32 @@ class RouteResultActivity : AppCompatActivity() {
         )
 
         binding.cardReturnToOrigin.setOnClickListener {
-            navigateToOrigin()
+
+            lifecycleScope.launch {
+                try {
+                    val routeId = intent.getIntExtra(EXTRA_ROUTE_ID, -1)
+                    if (routeId == -1) return@launch
+
+                    val route = routeRepository.getRouteById(routeId)
+                        ?: return@launch
+
+                    if (route.returnToOrigin && route.returnToOriginCompleted) {
+                        showFinishRouteSuggestion()
+                    } else {
+                        navigateToOrigin()
+                    }
+
+                } catch (e: Exception) {
+                    Toast.makeText(
+                        this@RouteResultActivity,
+                        "No se ha podido consultar el estado de la ruta.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
         }
 
-        binding.tvReturnToOriginStatus.setOnClickListener {
+        binding.ivReturnToOriginStatus.setOnClickListener {
 
             lifecycleScope.launch {
                 try {
@@ -104,6 +126,14 @@ class RouteResultActivity : AppCompatActivity() {
                         allStopsCompleted
                     ) {
                         confirmReturnToOrigin()
+                    } else if (route.returnToOrigin &&
+                        !route.returnToOriginCompleted
+                    ) {
+                        Toast.makeText(
+                            this@RouteResultActivity,
+                            "Regreso al punto de partida pendiente",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
 
                 } catch (e: Exception) {
@@ -295,7 +325,7 @@ class RouteResultActivity : AppCompatActivity() {
                                     Toast.LENGTH_SHORT
                                 ).show()
 
-                                returnToMainActivity()//finish()
+                                returnToMainActivity()
 
                             } catch (e: Exception) {
                                 Toast.makeText(
@@ -690,37 +720,54 @@ class RouteResultActivity : AppCompatActivity() {
             .show()
     }
 
+
     private fun updateReturnToOriginCard(route: RouteEntity) {
 
+        val statusColor = when {
+            !route.returnToOrigin -> R.color.rp_primary
+            route.returnToOriginCompleted -> R.color.rp_success
+            else -> R.color.rp_warning
+        }
+
+        val color = androidx.core.content.ContextCompat.getColor(
+            this,
+            statusColor
+        )
+
+        // Cambiar el color del icono de estado
         when {
             !route.returnToOrigin -> {
-                binding.tvReturnToOriginStatus.text =
-                    "Regresar al punto de partida"
-
-                binding.tvReturnToOriginStatus.setTextColor(
-                    android.graphics.Color.parseColor("#2563EB")
+                binding.ivReturnToOriginStatus.setImageResource(
+                    R.drawable.ic_arrow_circle_right_24
                 )
+                binding.ivReturnToOriginStatus.contentDescription =
+                    "Regresar al punto de partida"
             }
 
             route.returnToOriginCompleted -> {
-                binding.tvReturnToOriginStatus.text =
-                    "✓ Regreso al punto de partida completado"
-
-                binding.tvReturnToOriginStatus.setTextColor(
-                    android.graphics.Color.parseColor("#16A34A")
+                binding.ivReturnToOriginStatus.setImageResource(
+                    R.drawable.ic_check_circle_24
                 )
+                binding.ivReturnToOriginStatus.contentDescription =
+                    "Regreso al punto de partida completado"
             }
 
             else -> {
-                binding.tvReturnToOriginStatus.text =
-                    "Regreso al punto de partida pendiente"
-
-                binding.tvReturnToOriginStatus.setTextColor(
-                    android.graphics.Color.parseColor("#D97706")
+                binding.ivReturnToOriginStatus.setImageResource(
+                    R.drawable.ic_warning_triangle_24
                 )
+                binding.ivReturnToOriginStatus.contentDescription =
+                    "Regreso al punto de partida pendiente"
             }
         }
+
+        binding.ivReturnToOriginStatus.setColorFilter(color)
+
+        // Cambiar también el color del icono de casa y del título
+        binding.ivOriginIcon.setColorFilter(color)
+        binding.tvOriginTitle.setTextColor(color)
     }
+
 
 
 }
