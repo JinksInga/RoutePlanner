@@ -22,14 +22,30 @@
             android:contentDescription="Ubicación"
             android:layout_marginEnd="10dp"/>
 
-        <TextView
-            android:id="@+id/tvAddress"
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Dirección"
-            android:textSize="15sp"
-            android:textColor="#183153"/>
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvDestinationName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="#183153"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/tvAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Dirección"
+                android:textSize="14sp"
+                android:textColor="#526985"/>
+
+        </LinearLayout>
 
         <ImageButton
             android:id="@+id/btnEdit"

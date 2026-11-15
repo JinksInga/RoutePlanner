@@ -145,9 +145,13 @@ class EditRouteActivity : AppCompatActivity() {
                     return@launch
                 }
 
-                val addresses = availableDestinations
-                    .map { it.address }
-                    .toTypedArray()
+                val addresses = availableDestinations.map { destination ->
+                    if (destination.name.isNullOrBlank()) {
+                        destination.address
+                    } else {
+                        "${destination.name}\n${destination.address}"
+                    }
+                }.toTypedArray()
 
                 androidx.appcompat.app.AlertDialog.Builder(
                     this@EditRouteActivity
@@ -196,6 +200,7 @@ class EditRouteActivity : AppCompatActivity() {
             routeId = routeId,
             destinationId = destination.id,
             addressSnapshot = destination.address,
+            nameSnapshot = destination.name,
             latitude = destination.latitude!!,
             longitude = destination.longitude!!,
             stopOrder = nextOrder,
@@ -248,7 +253,29 @@ class EditRouteActivity : AppCompatActivity() {
                     .first()
 
                 editedStops.clear()
-                editedStops.addAll(stops)
+
+                val stopsWithNames = stops.map { stop ->
+
+                    if (stop.nameSnapshot.isNullOrBlank() &&
+                        stop.destinationId != null
+                    ) {
+                        val destination = destinationRepository.getDestination(
+                            stop.destinationId
+                        )
+
+                        if (!destination?.name.isNullOrBlank()) {
+                            stop.copy(
+                                nameSnapshot = destination?.name
+                            )
+                        } else {
+                            stop
+                        }
+                    } else {
+                        stop
+                    }
+                }
+
+                editedStops.addAll(stopsWithNames)
 
                 adapter.updateStops(editedStops)
 
@@ -461,26 +488,68 @@ class EditRouteActivity : AppCompatActivity() {
         latitude: Double,
         longitude: Double
     ) {
-        val newStop = RouteStopEntity(
-            id = 0,
-            routeId = routeId,
-            destinationId = null,
-            addressSnapshot = address,
-            latitude = latitude,
-            longitude = longitude,
-            stopOrder = (editedStops.maxOfOrNull { it.stopOrder } ?: 0) + 1,
-            isCompleted = false,
-            completedAt = null
-        )
+        val input = android.widget.EditText(this).apply {
+            hint = "Nombre del establecimiento (opcional)"
+            setSingleLine(true)
+        }
 
-        editedStops.add(newStop)
-        adapter.updateStops(editedStops)
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Nombre de la nueva parada")
+            .setMessage(address)
+            .setView(input)
+            .setPositiveButton("Añadir") { _, _ ->
 
-        Toast.makeText(
-            this,
-            "Nueva parada añadida. Pulsa Guardar cambios para conservarla.",
-            Toast.LENGTH_LONG
-        ).show()
+                val name = input.text.toString().trim()
+                    .ifBlank { null }
+
+                lifecycleScope.launch {
+                    try {
+                        // Guardar primero el destino en la base de datos.
+                        val newDestinationId = destinationRepository.insert(
+                            DestinationEntity(
+                                address = address,
+                                name = name,
+                                latitude = latitude,
+                                longitude = longitude
+                            )
+                        )
+
+                        // Crear la parada vinculada al destino guardado.
+                        val newStop = RouteStopEntity(
+                            id = 0,
+                            routeId = routeId,
+                            destinationId = newDestinationId.toInt(),
+                            addressSnapshot = address,
+                            nameSnapshot = name,
+                            latitude = latitude,
+                            longitude = longitude,
+                            stopOrder = (editedStops.maxOfOrNull {
+                                it.stopOrder
+                            } ?: 0) + 1,
+                            isCompleted = false,
+                            completedAt = null
+                        )
+
+                        editedStops.add(newStop)
+                        adapter.updateStops(editedStops)
+
+                        Toast.makeText(
+                            this@EditRouteActivity,
+                            "Destino guardado y parada añadida. Pulsa Guardar cambios para conservarla en la ruta.",
+                            Toast.LENGTH_LONG
+                        ).show()
+
+                    } catch (e: Exception) {
+                        Toast.makeText(
+                            this@EditRouteActivity,
+                            "Error al guardar el destino: ${e.message}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

@@ -336,6 +336,7 @@ class SelectDestinationsActivity : AppCompatActivity() {
                         routeId = 0,
                         destinationId = destination.id,
                         addressSnapshot = destination.address,
+                        nameSnapshot = destination.name,
                         latitude = destination.latitude!!,
                         longitude = destination.longitude!!,
                         stopOrder = index + 1

@@ -31,6 +31,8 @@ data class RouteStopEntity(
 
     val addressSnapshot: String,
 
+    val nameSnapshot: String? = null,
+
     val latitude: Double,
 
     val longitude: Double,
@@ -41,16 +43,3 @@ data class RouteStopEntity(
 
     val completedAt: Long? = null
 )
-/*
-* ¿Qué hemos conseguido?
-- routeId relaciona la parada con su ruta.
-- destinationId permite localizar la dirección original,
-  pero puede ser nulo si esa dirección se elimina.
-- addressSnapshot conserva la dirección tal como era cuando se creó la ruta.
-- latitude y longitude conservan sus coordenadas originales.
-- stopOrder mantiene el orden calculado.
-- isCompleted registra si has confirmado la visita.
-- completedAt guarda cuándo se completó.
-* Además, CASCADE garantiza que, si se elimina una ruta, también se eliminen sus paradas,
-  pero no las direcciones guardadas.
-* */

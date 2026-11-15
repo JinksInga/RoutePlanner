@@ -32,6 +32,3 @@ class DestinationRepository(
         return destinationDao.getById(id)
     }
 }
-/*
-* El repositorio será el intermediario entre la base de datos y el resto de la aplicación.
-* */

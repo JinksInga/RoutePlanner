@@ -26,6 +26,9 @@ class EditRouteStopAdapter(
         val tvAddress: TextView =
             itemView.findViewById(R.id.tvEditStopAddress)
 
+        val tvName: TextView =
+            itemView.findViewById(R.id.tvEditStopName)
+
         val tvStatus: TextView =
             itemView.findViewById(R.id.tvEditStopStatus)
 
@@ -58,6 +61,15 @@ class EditRouteStopAdapter(
 
         holder.tvNumber.text = "Parada ${position + 1}"
         holder.tvAddress.text = stop.addressSnapshot
+
+        if (stop.nameSnapshot.isNullOrBlank()) {
+            holder.tvName.visibility = View.GONE
+        } else {
+            holder.tvName.visibility = View.VISIBLE
+            holder.tvName.text = stop.nameSnapshot
+        }
+
+
         holder.tvStatus.text =
             if (completed) "Completada" else "Pendiente"
 

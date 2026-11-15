@@ -31,12 +31,19 @@ class HistoryRouteStopAdapter :
         return StopViewHolder(view)
     }
 
+
     override fun onBindViewHolder(holder: StopViewHolder, position: Int) {
         val stop = stops[position]
 
         holder.tvStopNumber.text = stop.stopOrder.toString()
-        holder.tvStopAddress.text = stop.addressSnapshot
+
+        holder.tvStopAddress.text = if (stop.nameSnapshot.isNullOrBlank()) {
+            stop.addressSnapshot
+        } else {
+            "${stop.nameSnapshot}\n${stop.addressSnapshot}"
+        }
     }
+
 
     override fun getItemCount(): Int = stops.size
 

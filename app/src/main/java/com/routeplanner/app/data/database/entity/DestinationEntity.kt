@@ -11,17 +11,11 @@ data class DestinationEntity(
 
     val address: String,
 
+    val name: String? = null,
+
     val latitude: Double? = null,
 
     val longitude: Double? = null,
 
     val createdAt: Long = System.currentTimeMillis()
 )
-/*
-* Algunos detalles:
-- id: identificador automático.
-- address: dirección completa.
-- latitude: latitud geográfica.
-- longitude: longitud geográfica.
-- createdAt: fecha de creación.
-* */

@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.routeplanner.app.adapters.HistoryRouteStopAdapter
 import com.routeplanner.app.data.database.RouteDatabase
 import com.routeplanner.app.databinding.ActivityHistoryRouteBinding
+import com.routeplanner.app.repository.DestinationRepository
 import com.routeplanner.app.repository.RouteRepository
 import com.routeplanner.app.repository.RouteStopRepository
 import kotlinx.coroutines.flow.collectLatest
@@ -19,6 +20,7 @@ class HistoryRouteActivity : AppCompatActivity() {
     private lateinit var routeRepository: RouteRepository
     private lateinit var routeStopRepository: RouteStopRepository
     private lateinit var adapter: HistoryRouteStopAdapter
+    private lateinit var destinationRepository: DestinationRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,6 +55,10 @@ class HistoryRouteActivity : AppCompatActivity() {
         routeStopRepository = RouteStopRepository(
             database.routeStopDao()
         )
+
+        destinationRepository = DestinationRepository(
+            database.destinationDao()
+        )
     }
 
     private fun configureRecyclerView() {
@@ -81,27 +87,60 @@ class HistoryRouteActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            val route = routeRepository.getRouteById(routeId)
+            try {
+                val route = routeRepository.getRouteById(routeId)
 
-            if (route == null) {
+                if (route == null) {
+                    Toast.makeText(
+                        this@HistoryRouteActivity,
+                        "No se ha encontrado la ruta",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    finish()
+                    return@launch
+                }
+
+                binding.toolbar.title = route.name
+                binding.tvHistoryRouteName.text = route.name
+                binding.tvHistoryRouteOrigin.text =
+                    "Origen: ${route.originAddress}"
+
+                routeStopRepository.getStopsByRoute(routeId)
+                    .collectLatest { stops ->
+
+                        val stopsWithNames = stops.map { stop ->
+
+                            if (stop.nameSnapshot.isNullOrBlank() &&
+                                stop.destinationId != null
+                            ) {
+                                val destination =
+                                    destinationRepository.getDestination(
+                                        stop.destinationId
+                                    )
+
+                                if (!destination?.name.isNullOrBlank()) {
+                                    stop.copy(
+                                        nameSnapshot = destination?.name
+                                    )
+                                } else {
+                                    stop
+                                }
+                            } else {
+                                stop
+                            }
+                        }
+
+                        adapter.updateStops(stopsWithNames)
+                    }
+
+            } catch (e: Exception) {
                 Toast.makeText(
                     this@HistoryRouteActivity,
-                    "No se ha encontrado la ruta",
-                    Toast.LENGTH_SHORT
+                    "Error al cargar el historial: ${e.message}",
+                    Toast.LENGTH_LONG
                 ).show()
-                finish()
-                return@launch
             }
-
-            binding.toolbar.title = route.name
-            binding.tvHistoryRouteName.text = route.name
-            binding.tvHistoryRouteOrigin.text =
-                "Origen: ${route.originAddress}"
-
-            routeStopRepository.getStopsByRoute(routeId)
-                .collectLatest { stops ->
-                    adapter.updateStops(stops)
-                }
         }
     }
+
 }

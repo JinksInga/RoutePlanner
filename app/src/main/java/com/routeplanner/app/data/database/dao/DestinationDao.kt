@@ -35,8 +35,3 @@ interface DestinationDao {
     """)
     fun search(query: String): Flow<List<DestinationEntity>>
 }
-/*
-* Un detalle interesante:
-* utilizamos Flow, de manera que la pantalla podrá recibir automáticamente
-* las actualizaciones cuando se añadan, modifiquen o eliminen direcciones.
-* */

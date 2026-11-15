@@ -35,7 +35,11 @@ class RouteDestinationAdapter(
         val destination = destinations[position]
 
         holder.checkBox.setOnCheckedChangeListener(null)
-        holder.checkBox.text = destination.address
+        holder.checkBox.text = if (destination.name.isNullOrBlank()) {
+            destination.address
+        } else {
+            "${destination.name}\n${destination.address}"
+        }
         holder.checkBox.isChecked = selectedIds.contains(destination.id)
 
         holder.checkBox.setOnCheckedChangeListener { _, isChecked ->

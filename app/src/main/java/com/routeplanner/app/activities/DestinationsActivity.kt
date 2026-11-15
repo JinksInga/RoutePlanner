@@ -171,8 +171,12 @@ class DestinationsActivity : Activity()
 
     private fun filterDestinations(query: String) {
 
-        val filtered = allDestinations.filter {
-            it.address.contains(
+        val filtered = allDestinations.filter { destination ->
+
+            destination.address.contains(
+                query,
+                ignoreCase = true
+            ) || destination.name.orEmpty().contains(
                 query,
                 ignoreCase = true
             )
@@ -192,9 +196,10 @@ class DestinationsActivity : Activity()
             if (allDestinations.isEmpty()) {
                 "Todavía no tienes direcciones guardadas."
             } else {
-                "No se encontraron direcciones."
+                "No se encontraron destinos."
             }
     }
+
 
     private fun showDestinationDialog(
         destination: DestinationEntity?
@@ -381,60 +386,108 @@ class DestinationsActivity : Activity()
             }
     }
 
-    private fun saveSelectedDestination(address: String,
-                                        latitude: Double,
-                                        longitude: Double)
-    {
-        activityScope.launch {
+    private fun saveSelectedDestination(
+        address: String,
+        latitude: Double,
+        longitude: Double
+    ) {
+        val destination = pendingDestination
 
-            val destination = pendingDestination
+        val input = EditText(this).apply {
+            hint = "Nombre del destino (opcional)"
+            setSingleLine(true)
+            setText(destination?.name.orEmpty())
+        }
 
-            if (destination == null) {
-
-                val newDestinationId = repository.insert(
-                    DestinationEntity(
-                        address = address,
-                        latitude = latitude,
-                        longitude = longitude
-                    )
-                )
-
-                Toast.makeText(
-                    this@DestinationsActivity,
-                    "Dirección guardada correctamente",
-                    Toast.LENGTH_SHORT
-                ).show()
-
-                if (intent.getBooleanExtra(EXTRA_RETURN_AFTER_ADD, false)) {
-                    val resultIntent = Intent().apply {
-                        putExtra(
-                            EXTRA_CREATED_DESTINATION_ID,
-                            newDestinationId.toInt()
-                        )
-                    }
-
-                    setResult(RESULT_OK, resultIntent)
-                    finish()
+        val dialog = AlertDialog.Builder(this)
+            .setTitle(
+                if (destination == null) {
+                    "Nuevo destino"
+                } else {
+                    "Modificar destino"
                 }
-
-            } else {
-
-                repository.update(
-                    destination.copy(
-                        address = address,
-                        latitude = latitude,
-                        longitude = longitude
-                    )
-                )
-
-                Toast.makeText(
-                    this@DestinationsActivity,
-                    "Dirección modificada correctamente",
-                    Toast.LENGTH_SHORT
-                ).show()
+            )
+            .setMessage("Dirección seleccionada:\n\n$address")
+            .setView(input)
+            .setNegativeButton("Cancelar") { _, _ ->
+                pendingDestination = null
             }
+            .setPositiveButton("Guardar", null)
+            .create()
 
+        dialog.setOnCancelListener {
             pendingDestination = null
         }
+
+        dialog.setOnShowListener {
+
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                .setOnClickListener {
+
+                    val name = input.text.toString()
+                        .trim()
+                        .takeIf { it.isNotEmpty() }
+
+                    activityScope.launch {
+
+                        if (destination == null) {
+
+                            val newDestinationId = repository.insert(
+                                DestinationEntity(
+                                    address = address,
+                                    name = name,
+                                    latitude = latitude,
+                                    longitude = longitude
+                                )
+                            )
+
+                            Toast.makeText(
+                                this@DestinationsActivity,
+                                "Destino guardado correctamente",
+                                Toast.LENGTH_SHORT
+                            ).show()
+
+                            if (intent.getBooleanExtra(
+                                    EXTRA_RETURN_AFTER_ADD,
+                                    false
+                                )
+                            ) {
+                                val resultIntent = Intent().apply {
+                                    putExtra(
+                                        EXTRA_CREATED_DESTINATION_ID,
+                                        newDestinationId.toInt()
+                                    )
+                                }
+
+                                setResult(RESULT_OK, resultIntent)
+                                finish()
+                            }
+
+                        } else {
+
+                            repository.update(
+                                destination.copy(
+                                    address = address,
+                                    name = name,
+                                    latitude = latitude,
+                                    longitude = longitude
+                                )
+                            )
+
+                            Toast.makeText(
+                                this@DestinationsActivity,
+                                "Destino modificado correctamente",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
+                        pendingDestination = null
+                        dialog.dismiss()
+                    }
+                }
+        }
+
+        dialog.show()
     }
+
 }

@@ -1,7 +1,6 @@
 package com.routeplanner.app.activities
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,6 +17,7 @@ import android.content.Intent
 import android.net.Uri
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.recyclerview.widget.ConcatAdapter
 import com.routeplanner.app.R
@@ -30,6 +30,7 @@ class RouteResultActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_DESTINATION_IDS = "extra_destination_ids"
         const val EXTRA_ROUTE_ID = "extra_route_id"
+        const val EXTRA_RETURN_TO_ROUTE_LIST = "extra_return_to_route_list"
     }
 
     private lateinit var binding: ActivityRouteResultBinding
@@ -55,7 +56,7 @@ class RouteResultActivity : AppCompatActivity() {
 
         // Acción de la flecha
         binding.toolbar.setNavigationOnClickListener {
-            returnToMainActivity()
+            handleBackNavigation()
         }
 
         // Acción del botón atrás de Android
@@ -63,7 +64,7 @@ class RouteResultActivity : AppCompatActivity() {
             this,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    returnToMainActivity()
+                    handleBackNavigation()
                 }
             }
         )
@@ -148,6 +149,20 @@ class RouteResultActivity : AppCompatActivity() {
 
         configureRecyclerView()
         loadRoute()
+    }
+
+    private fun handleBackNavigation() {
+
+        val returnToRouteList = intent.getBooleanExtra(
+            EXTRA_RETURN_TO_ROUTE_LIST,
+            false
+        )
+
+        if (returnToRouteList) {
+            finish()
+        } else {
+            returnToMainActivity()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -637,24 +652,47 @@ class RouteResultActivity : AppCompatActivity() {
                         return@collectLatest
                     }
 
-                    val pendingStops = stops.filter { !it.isCompleted }
+                    // Recuperar los nombres de las paradas antiguas.
+                    val stopsWithNames = stops.map { stop ->
 
-                    val completedStops = stops
+                        if (stop.nameSnapshot.isNullOrBlank() &&
+                            stop.destinationId != null
+                        ) {
+                            val destination = repository.getDestination(
+                                stop.destinationId
+                            )
+
+                            if (!destination?.name.isNullOrBlank()) {
+                                stop.copy(
+                                    nameSnapshot = destination?.name
+                                )
+                            } else {
+                                stop
+                            }
+                        } else {
+                            stop
+                        }
+                    }
+
+                    val pendingStops = stopsWithNames
+                        .filter { !it.isCompleted }
+
+                    val completedStops = stopsWithNames
                         .filter { it.isCompleted }
                         .sortedBy { it.completedAt }
 
-                    // Actualizar las dos listas
+                    // Actualizar las dos listas.
                     pendingAdapter.updateDestinations(pendingStops)
                     completedAdapter.updateDestinations(completedStops)
 
-                    // Actualizar los contadores
+                    // Actualizar los contadores.
                     pendingHeaderAdapter.updateCount(pendingStops.size)
                     completedHeaderAdapter.updateCount(completedStops.size)
 
                     val completedCount = completedStops.size
 
                     binding.tvRouteSummary.text =
-                        "${stops.size} paradas · $completedCount completadas"
+                        "${stopsWithNames.size} paradas · $completedCount completadas"
                 }
         }
     }
@@ -767,7 +805,6 @@ class RouteResultActivity : AppCompatActivity() {
         binding.ivOriginIcon.setColorFilter(color)
         binding.tvOriginTitle.setTextColor(color)
     }
-
 
 
 }

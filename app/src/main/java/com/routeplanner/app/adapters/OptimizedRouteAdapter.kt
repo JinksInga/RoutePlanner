@@ -34,6 +34,9 @@ class OptimizedRouteAdapter(
         val tvStopAddress: TextView =
             itemView.findViewById(R.id.tvStopAddress)
 
+        val tvStopName: TextView =
+            itemView.findViewById(R.id.tvStopName)
+
         val btnCompleteStop: Button =
             itemView.findViewById(R.id.btnCompleteStop)
     }
@@ -59,6 +62,13 @@ class OptimizedRouteAdapter(
 
         holder.tvStopNumber.text = destination.stopOrder.toString()
         holder.tvStopAddress.text = destination.addressSnapshot
+
+        if (destination.nameSnapshot.isNullOrBlank()) {
+            holder.tvStopName.visibility = View.GONE
+        } else {
+            holder.tvStopName.visibility = View.VISIBLE
+            holder.tvStopName.text = destination.nameSnapshot
+        }
 
         if (showCompleteButton) {
             // Parada pendiente

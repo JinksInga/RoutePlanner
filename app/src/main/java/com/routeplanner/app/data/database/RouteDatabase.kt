@@ -21,7 +21,7 @@ import com.routeplanner.app.data.database.entity.RouteStopEntity
         RouteEntity::class,
         RouteStopEntity::class
     ],
-    version = 4,
+    version = 6,
     exportSchema = false
 )
 abstract class RouteDatabase : RoomDatabase() {
@@ -104,6 +104,28 @@ abstract class RouteDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+            ALTER TABLE destinations
+            ADD COLUMN name TEXT
+            """.trimIndent()
+                )
+            }
+        }
+
+        private val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+            ALTER TABLE route_stops
+            ADD COLUMN nameSnapshot TEXT
+            """.trimIndent()
+                )
+            }
+        }
+
         fun getDatabase(context: Context): RouteDatabase {
 
             return INSTANCE ?: synchronized(this) {
@@ -116,7 +138,9 @@ abstract class RouteDatabase : RoomDatabase() {
                     .addMigrations(
                         MIGRATION_1_2,
                         MIGRATION_2_3,
-                        MIGRATION_3_4)
+                        MIGRATION_3_4,
+                        MIGRATION_4_5,
+                        MIGRATION_5_6)
                     .build()
 
                 INSTANCE = instance

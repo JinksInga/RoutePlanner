@@ -170,9 +170,13 @@ class SelectRouteActivity : AppCompatActivity() {
                     RouteResultActivity.EXTRA_ROUTE_ID,
                     route.id
                 )
+                intent.putExtra(
+                    RouteResultActivity.EXTRA_RETURN_TO_ROUTE_LIST,
+                    true
+                )
 
                 startActivity(intent)
-                finish()
+                //finish()
 
             } catch (e: Exception) {
                 Toast.makeText(

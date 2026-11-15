@@ -40,6 +40,17 @@ class DestinationAdapter(
 
         holder.binding.tvAddress.text = destination.address
 
+        if (destination.name.isNullOrBlank()) {
+            holder.binding.tvDestinationName.visibility =
+                android.view.View.GONE
+        } else {
+            holder.binding.tvDestinationName.visibility =
+                android.view.View.VISIBLE
+
+            holder.binding.tvDestinationName.text =
+                destination.name
+        }
+
         holder.binding.btnEdit.setOnClickListener {
             onEdit(destination)
         }
