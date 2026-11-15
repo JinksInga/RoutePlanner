@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -37,6 +38,31 @@ class EditRouteActivity : AppCompatActivity() {
     private val AUTOCOMPLETE_REQUEST_CODE = 1003
     private var routeId: Int = -1
     private val editedStops = mutableListOf<RouteStopEntity>()
+
+    private val savedDestinationLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+
+            if (result.resultCode == RESULT_OK) {
+
+                val destinationId = result.data?.getIntExtra(
+                    SelectDestinationsActivity.EXTRA_SELECTED_DESTINATION_ID,
+                    -1
+                ) ?: -1
+
+                if (destinationId != -1) {
+                    lifecycleScope.launch {
+                        val destination =
+                            destinationRepository.getDestination(destinationId)
+
+                        if (destination != null) {
+                            addSavedDestination(destination)
+                        }
+                    }
+                }
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -84,95 +110,24 @@ class EditRouteActivity : AppCompatActivity() {
         }
 
         binding.fabAddRouteStop.setOnClickListener {
-            showAddStopOptions()
+            showSavedDestinations()
         }
 
         loadRoute()
     }
 
-    private fun showAddStopOptions() {
-        val options = arrayOf(
-            "Elegir dirección guardada",
-            "Buscar una dirección nueva"
-        )
-
-        androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("Añadir parada")
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> showSavedDestinations()
-                    1 -> launchNewDestinationAutocomplete()
-                }
-            }
-            .setNegativeButton("Cancelar", null)
-            .show()
-    }
-
-    private fun launchNewDestinationAutocomplete() {
-        val intent = PlaceAutocomplete.createIntent(this) {
-            setCountries(listOf("ES"))
-        }
-
-        startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE)
-    }
-
     private fun showSavedDestinations() {
-        lifecycleScope.launch {
-            try {
-                val destinations = destinationRepository
-                    .getAllDestinations()
-                    .first()
-
-                if (destinations.isEmpty()) {
-                    Toast.makeText(
-                        this@EditRouteActivity,
-                        "No tienes direcciones guardadas.",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return@launch
-                }
-
-                val availableDestinations = destinations.filter {
-                    it.latitude != null && it.longitude != null
-                }
-
-                if (availableDestinations.isEmpty()) {
-                    Toast.makeText(
-                        this@EditRouteActivity,
-                        "No hay direcciones con coordenadas disponibles.",
-                        Toast.LENGTH_LONG
-                    ).show()
-                    return@launch
-                }
-
-                val addresses = availableDestinations.map { destination ->
-                    if (destination.name.isNullOrBlank()) {
-                        destination.address
-                    } else {
-                        "${destination.name}\n${destination.address}"
-                    }
-                }.toTypedArray()
-
-                androidx.appcompat.app.AlertDialog.Builder(
-                    this@EditRouteActivity
-                )
-                    .setTitle("Selecciona una dirección")
-                    .setItems(addresses) { _, position ->
-                        addSavedDestination(
-                            availableDestinations[position]
-                        )
-                    }
-                    .setNegativeButton("Cancelar", null)
-                    .show()
-
-            } catch (e: Exception) {
-                Toast.makeText(
-                    this@EditRouteActivity,
-                    "Error al cargar direcciones: ${e.message}",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
+        val intent = Intent(
+            this,
+            SelectDestinationsActivity::class.java
+        ).apply {
+            putExtra(
+                SelectDestinationsActivity.EXTRA_PICK_SINGLE_DESTINATION,
+                true
+            )
         }
+
+        savedDestinationLauncher.launch(intent)
     }
 
     private fun addSavedDestination(destination: DestinationEntity) {

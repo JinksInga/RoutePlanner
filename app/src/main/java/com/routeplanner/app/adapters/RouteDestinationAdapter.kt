@@ -8,7 +8,8 @@ import com.routeplanner.app.R
 import com.routeplanner.app.data.database.entity.DestinationEntity
 
 class RouteDestinationAdapter(
-    private val onSelectionChanged: (List<DestinationEntity>) -> Unit
+    private val onSelectionChanged: (List<DestinationEntity>) -> Unit,
+    private val singleSelectionMode: Boolean = false
 ) : RecyclerView.Adapter<RouteDestinationAdapter.DestinationViewHolder>() {
 
     private val destinations = mutableListOf<DestinationEntity>()
@@ -22,8 +23,13 @@ class RouteDestinationAdapter(
         parent: ViewGroup,
         viewType: Int
     ): DestinationViewHolder {
+
         val checkBox = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_route_destination, parent, false) as CheckBox
+            .inflate(
+                R.layout.item_route_destination,
+                parent,
+                false
+            ) as CheckBox
 
         return DestinationViewHolder(checkBox)
     }
@@ -32,25 +38,45 @@ class RouteDestinationAdapter(
         holder: DestinationViewHolder,
         position: Int
     ) {
+
         val destination = destinations[position]
 
         holder.checkBox.setOnCheckedChangeListener(null)
+
         holder.checkBox.text = if (destination.name.isNullOrBlank()) {
             destination.address
         } else {
             "${destination.name}\n${destination.address}"
         }
-        holder.checkBox.isChecked = selectedIds.contains(destination.id)
+
+        holder.checkBox.isChecked =
+            selectedIds.contains(destination.id)
 
         holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                selectedIds.add(destination.id)
+
+            if (singleSelectionMode) {
+
+                selectedIds.clear()
+
+                if (isChecked) {
+                    selectedIds.add(destination.id)
+                }
+
+                notifyDataSetChanged()
+
             } else {
-                selectedIds.remove(destination.id)
+
+                if (isChecked) {
+                    selectedIds.add(destination.id)
+                } else {
+                    selectedIds.remove(destination.id)
+                }
             }
 
             onSelectionChanged(
-                destinations.filter { selectedIds.contains(it.id) }
+                destinations.filter {
+                    selectedIds.contains(it.id)
+                }
             )
         }
     }
@@ -58,27 +84,41 @@ class RouteDestinationAdapter(
     override fun getItemCount(): Int = destinations.size
 
     fun updateDestinations(newDestinations: List<DestinationEntity>) {
+
         destinations.clear()
         destinations.addAll(newDestinations)
 
-        selectedIds.retainAll(destinations.map { it.id }.toSet())
+        selectedIds.retainAll(
+            destinations.map { it.id }.toSet()
+        )
 
         notifyDataSetChanged()
 
         onSelectionChanged(
-            destinations.filter { selectedIds.contains(it.id) }
+            destinations.filter {
+                selectedIds.contains(it.id)
+            }
         )
     }
 
     fun restoreSelection(ids: Set<Int>) {
+
         selectedIds.clear()
-        selectedIds.addAll(ids)
+
+        if (singleSelectionMode) {
+            ids.firstOrNull()?.let {
+                selectedIds.add(it)
+            }
+        } else {
+            selectedIds.addAll(ids)
+        }
 
         notifyDataSetChanged()
 
         onSelectionChanged(
-            destinations.filter { selectedIds.contains(it.id) }
+            destinations.filter {
+                selectedIds.contains(it.id)
+            }
         )
     }
-
 }

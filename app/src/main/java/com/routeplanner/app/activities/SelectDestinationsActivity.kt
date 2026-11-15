@@ -24,6 +24,14 @@ import kotlinx.coroutines.launch
 
 class SelectDestinationsActivity : AppCompatActivity() {
 
+    companion object {
+        const val EXTRA_PICK_SINGLE_DESTINATION =
+            "extra_pick_single_destination"
+
+        const val EXTRA_SELECTED_DESTINATION_ID =
+            "extra_selected_destination_id"
+    }
+
     private lateinit var binding: ActivitySelectDestinationsBinding
     private lateinit var adapter: RouteDestinationAdapter
     private lateinit var repository: DestinationRepository
@@ -40,6 +48,7 @@ class SelectDestinationsActivity : AppCompatActivity() {
     private var originAddress: String = ""
     private var optimizationType: String = "NEAREST"
     private var returnToOrigin: Boolean = false
+    private var singleSelectionMode: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,8 +56,14 @@ class SelectDestinationsActivity : AppCompatActivity() {
         binding = ActivitySelectDestinationsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Recuperar los datos de la primera pantalla.
-        if (!receiveRouteData()) {
+        singleSelectionMode = intent.getBooleanExtra(
+            EXTRA_PICK_SINGLE_DESTINATION,
+            false
+        )
+
+        // Recuperar los datos de la primera pantalla
+        // solamente cuando se está creando una ruta nueva.
+        if (!singleSelectionMode && !receiveRouteData()) {
             finish()
             return
         }
@@ -127,10 +142,32 @@ class SelectDestinationsActivity : AppCompatActivity() {
         )
     }
 
+
     private fun configureRecyclerView() {
 
-        adapter = RouteDestinationAdapter { selectedDestinations ->
+        adapter = RouteDestinationAdapter(
+            onSelectionChanged = { selectedDestinations ->
 
+            // Modo de selección individual: devolver el destino elegido.
+            if (singleSelectionMode) {
+                val selectedDestination = selectedDestinations.lastOrNull()
+
+                if (selectedDestination != null) {
+                    val resultIntent = Intent().apply {
+                        putExtra(
+                            EXTRA_SELECTED_DESTINATION_ID,
+                            selectedDestination.id
+                        )
+                    }
+
+                    setResult(RESULT_OK, resultIntent)
+                    finish()
+                }
+
+                return@RouteDestinationAdapter
+            }
+
+            // Modo normal: selección múltiple para crear una ruta.
             val selectedIds = selectedDestinations.map {
                 it.id
             }.toSet()
@@ -152,7 +189,9 @@ class SelectDestinationsActivity : AppCompatActivity() {
                     )
                 )
             }
-        }
+            },
+            singleSelectionMode = singleSelectionMode
+        )
 
         binding.rvRouteDestinations.layoutManager =
             LinearLayoutManager(this)
@@ -160,17 +199,19 @@ class SelectDestinationsActivity : AppCompatActivity() {
         binding.rvRouteDestinations.adapter = adapter
     }
 
+
     private fun observeDestinations() {
 
         lifecycleScope.launch {
 
             repository.getAllDestinations().collectLatest { destinations ->
 
-                // Recuperar la selección antes de actualizar el adaptador.
-                val savedSelection = getSelectedDestinations()
-
                 adapter.updateDestinations(destinations)
-                adapter.restoreSelection(savedSelection)
+
+                if (!singleSelectionMode) {
+                    val savedSelection = getSelectedDestinations()
+                    adapter.restoreSelection(savedSelection)
+                }
 
                 if (destinations.isEmpty()) {
 
@@ -188,8 +229,14 @@ class SelectDestinationsActivity : AppCompatActivity() {
 
     private fun configureButtons() {
 
-        binding.btnCalculateRoute.setOnClickListener {
-            calculateRoute()
+        if (singleSelectionMode) {
+            binding.toolbar.title = "Selecciona una dirección"
+            binding.btnCalculateRoute.visibility = View.GONE
+            binding.btnAddDestination.visibility = View.VISIBLE
+        } else {
+            binding.btnCalculateRoute.setOnClickListener {
+                calculateRoute()
+            }
         }
 
         binding.btnAddDestination.setOnClickListener {
@@ -403,18 +450,33 @@ class SelectDestinationsActivity : AppCompatActivity() {
 
                 if (destinationId != -1) {
 
-                    val selectedIds = getSelectedDestinations().toMutableSet()
-                    selectedIds.add(destinationId)
+                    if (singleSelectionMode) {
 
-                    saveSelectedDestinations(selectedIds)
+                        val resultIntent = Intent().apply {
+                            putExtra(
+                                EXTRA_SELECTED_DESTINATION_ID,
+                                destinationId
+                            )
+                        }
 
-                    lifecycleScope.launch {
-                        val destinations = repository
-                            .getAllDestinations()
-                            .first()
+                        setResult(RESULT_OK, resultIntent)
+                        finish()
 
-                        adapter.updateDestinations(destinations)
-                        adapter.restoreSelection(selectedIds)
+                    } else {
+
+                        val selectedIds = getSelectedDestinations().toMutableSet()
+                        selectedIds.add(destinationId)
+
+                        saveSelectedDestinations(selectedIds)
+
+                        lifecycleScope.launch {
+                            val destinations = repository
+                                .getAllDestinations()
+                                .first()
+
+                            adapter.updateDestinations(destinations)
+                            adapter.restoreSelection(selectedIds)
+                        }
                     }
                 }
             }
